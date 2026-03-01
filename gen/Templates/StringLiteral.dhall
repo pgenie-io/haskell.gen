@@ -10,8 +10,8 @@ in  Algebra.module
               "\""
           ++  Deps.Prelude.Function.composeList
                 Text
-                [ Deps.Prelude.Text.replace "\"" "\\\""
-                , Deps.Prelude.Text.replace "\\" "\\\\"
+                [ Deps.Prelude.Text.replace "\\" "\\\\"
+                , Deps.Prelude.Text.replace "\"" "\\\""
                 , Deps.Prelude.Text.replace "\n" ("\\n\\" ++ "\n" ++ "\\")
                 ]
                 params
