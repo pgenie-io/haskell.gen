@@ -56,12 +56,12 @@ instance Mapping.IsStatement GetAlbumsByArtist where
     where
       sql =
         "SELECT \n\
-        \    a.id,\n\
-        \    a.title,\n\
-        \    a.release_year,\n\
-        \    a.album_type\n\
-        \FROM albums a\n\
-        \WHERE a.artist_id = $1 ORDER BY a.release_year DESC"
+                \    a.id,\n\
+                \    a.title,\n\
+                \    a.release_year,\n\
+                \    a.album_type\n\
+                \FROM albums a\n\
+                \WHERE a.artist_id = $1 ORDER BY a.release_year DESC"
 
       encoder =
         mconcat

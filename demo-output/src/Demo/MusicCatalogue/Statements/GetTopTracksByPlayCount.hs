@@ -67,21 +67,21 @@ instance Mapping.IsStatement GetTopTracksByPlayCount where
     where
       sql =
         "SELECT \n\
-        \    t.id,\n\
-        \    t.title,\n\
-        \    ar.name as artist_name,\n\
-        \    a.title as album_title,\n\
-        \    COALESCE(p.play_count, 0) as play_count\n\
-        \FROM tracks t\n\
-        \JOIN albums a ON t.album_id = a.id\n\
-        \JOIN artists ar ON a.artist_id = ar.id\n\
-        \LEFT JOIN (\n\
-        \    SELECT track_id, COUNT(*) as play_count\n\
-        \    FROM play_history\n\
-        \    GROUP BY track_id\n\
-        \) p ON t.id = p.track_id\n\
-        \ORDER BY play_count DESC\n\
-        \LIMIT $1"
+                \    t.id,\n\
+                \    t.title,\n\
+                \    ar.name as artist_name,\n\
+                \    a.title as album_title,\n\
+                \    COALESCE(p.play_count, 0) as play_count\n\
+                \FROM tracks t\n\
+                \JOIN albums a ON t.album_id = a.id\n\
+                \JOIN artists ar ON a.artist_id = ar.id\n\
+                \LEFT JOIN (\n\
+                \    SELECT track_id, COUNT(*) as play_count\n\
+                \    FROM play_history\n\
+                \    GROUP BY track_id\n\
+                \) p ON t.id = p.track_id\n\
+                \ORDER BY play_count DESC\n\
+                \LIMIT $1"
 
       encoder =
         mconcat

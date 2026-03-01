@@ -54,8 +54,8 @@ instance Mapping.IsStatement CreatePlaylist where
     where
       sql =
         "INSERT INTO playlists (name, description, user_id, created_at)\n\
-        \VALUES ($2, $3, $1, NOW())\n\
-        \RETURNING id, name, created_at"
+                \VALUES ($2, $3, $1, NOW())\n\
+                \RETURNING id, name, created_at"
 
       encoder =
         mconcat

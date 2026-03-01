@@ -74,20 +74,20 @@ instance Mapping.IsStatement GetTrackDetails where
     where
       sql =
         "SELECT \n\
-        \    t.id,\n\
-        \    t.title,\n\
-        \    t.duration_seconds,\n\
-        \    t.track_number,\n\
-        \    a.id as album_id,\n\
-        \    a.title as album_title,\n\
-        \    ar.id as artist_id,\n\
-        \    ar.name as artist_name,\n\
-        \    g.name as genre\n\
-        \FROM tracks t\n\
-        \JOIN albums a ON t.album_id = a.id\n\
-        \JOIN artists ar ON a.artist_id = ar.id\n\
-        \LEFT JOIN genres g ON t.genre_id = g.id\n\
-        \WHERE t.id = $1"
+                \    t.id,\n\
+                \    t.title,\n\
+                \    t.duration_seconds,\n\
+                \    t.track_number,\n\
+                \    a.id as album_id,\n\
+                \    a.title as album_title,\n\
+                \    ar.id as artist_id,\n\
+                \    ar.name as artist_name,\n\
+                \    g.name as genre\n\
+                \FROM tracks t\n\
+                \JOIN albums a ON t.album_id = a.id\n\
+                \JOIN artists ar ON a.artist_id = ar.id\n\
+                \LEFT JOIN genres g ON t.genre_id = g.id\n\
+                \WHERE t.id = $1"
 
       encoder =
         mconcat

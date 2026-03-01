@@ -24,7 +24,6 @@ let run =
         import qualified Hasql.Decoders as Decoders
         import qualified Hasql.Encoders as Encoders
         import qualified Hasql.Mapping as Mapping
-        import qualified Hasql.Mapping as Mapping
 
         -- |
         -- Representation of the @${params.pgTypeName}@ user-declared PostgreSQL record type.

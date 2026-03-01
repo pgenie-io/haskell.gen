@@ -56,15 +56,15 @@ instance Mapping.IsStatement GetArtistsWithTrackCount where
     where
       sql =
         "SELECT \n\
-        \    ar.id,\n\
-        \    ar.name,\n\
-        \    COUNT(DISTINCT t.id) as track_count,\n\
-        \    COUNT(DISTINCT a.id) as album_count\n\
-        \FROM artists ar\n\
-        \LEFT JOIN albums a ON ar.id = a.artist_id\n\
-        \LEFT JOIN tracks t ON a.id = t.album_id\n\
-        \GROUP BY ar.id, ar.name\n\
-        \ORDER BY track_count DESC"
+                \    ar.id,\n\
+                \    ar.name,\n\
+                \    COUNT(DISTINCT t.id) as track_count,\n\
+                \    COUNT(DISTINCT a.id) as album_count\n\
+                \FROM artists ar\n\
+                \LEFT JOIN albums a ON ar.id = a.artist_id\n\
+                \LEFT JOIN tracks t ON a.id = t.album_id\n\
+                \GROUP BY ar.id, ar.name\n\
+                \ORDER BY track_count DESC"
 
       encoder =
         mconcat

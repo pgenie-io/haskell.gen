@@ -61,15 +61,15 @@ instance Mapping.IsStatement SearchTracksByTitle where
     where
       sql =
         "SELECT \n\
-        \    t.id,\n\
-        \    t.title,\n\
-        \    t.duration_seconds,\n\
-        \    a.title as album_title,\n\
-        \    ar.name as artist_name\n\
-        \FROM tracks t\n\
-        \JOIN albums a ON t.album_id = a.id\n\
-        \JOIN artists ar ON a.artist_id = ar.id\n\
-        \WHERE t.title ILIKE '%' || $1 || '%' ORDER BY ar.name, a.title, t.track_number"
+                \    t.id,\n\
+                \    t.title,\n\
+                \    t.duration_seconds,\n\
+                \    a.title as album_title,\n\
+                \    ar.name as artist_name\n\
+                \FROM tracks t\n\
+                \JOIN albums a ON t.album_id = a.id\n\
+                \JOIN artists ar ON a.artist_id = ar.id\n\
+                \WHERE t.title ILIKE '%' || $1 || '%' ORDER BY ar.name, a.title, t.track_number"
 
       encoder =
         mconcat
