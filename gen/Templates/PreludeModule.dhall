@@ -18,7 +18,7 @@ let run =
         import Data.Word as Exports (Word16, Word32, Word64)
         import Data.Scientific as Exports (Scientific)
         import Data.ByteString as Exports (ByteString)
-        import Data.Time as Exports (Day, TimeOfDay, LocalTime, UTCTime)
+        import Data.Time as Exports (Day, DiffTime, TimeOfDay, TimeZone, LocalTime, UTCTime)
         import Data.Vector as Exports (Vector)
 
         ''

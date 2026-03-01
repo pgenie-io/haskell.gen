@@ -20,7 +20,7 @@ let escapeText
         Text
         [ Prelude.Text.replace "\"" "\\\""
         , Prelude.Text.replace "\\" "\\\\"
-        , Prelude.Text.replace "\n" ("\\n\\" ++ "\n" ++ "        " ++ "\\")
+        , Prelude.Text.replace "\n" ("\\n\\" ++ "\n" ++ "\\")
         ]
 
 let renderExp

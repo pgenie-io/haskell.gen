@@ -14,7 +14,6 @@
 
 # Unignore subtrees:
 !/.github/
-!/design/
 !/demo-output/
 !/gen/
 

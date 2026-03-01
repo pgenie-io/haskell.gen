@@ -6,7 +6,6 @@ import qualified Data.Vector as Vector
 import qualified Hasql.Decoders as Decoders
 import qualified Hasql.Encoders as Encoders
 import qualified Hasql.Mapping as Mapping
-import qualified Hasql.Mapping as Mapping
 
 -- |
 -- Representation of the @track_metadata@ user-declared PostgreSQL record type.
