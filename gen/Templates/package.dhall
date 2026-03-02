@@ -12,7 +12,6 @@
 , FieldDeclaration = ./FieldDeclaration.dhall
 , RecordDeclaration = ./RecordDeclaration.dhall
 , ReexportModule = ./ReexportModule.dhall
-, CabalProjectFile = ./CabalProjectFile.dhall
 , PreludeModule = ./PreludeModule.dhall
 , Haddock = ./Haddock.dhall
 }

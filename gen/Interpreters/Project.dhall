@@ -50,11 +50,6 @@ let combineOutputs =
                 )
                 queries
 
-        let cabalProjectFile =
-              { path = "cabal.project"
-              , content = Templates.CabalProjectFile.run {=}
-              }
-
         let preludeFile =
               { path =
                   Templates.ModulePath.run
@@ -144,8 +139,7 @@ let combineOutputs =
 
               in  { path, content }
 
-        in      [ cabalProjectFile
-                , cabalFile
+        in      [ cabalFile
                 , preludeFile
                 , customTypesFile
                 , statementsFile

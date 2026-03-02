@@ -64,7 +64,7 @@ in  Algebra.module
               bytestring >=0.10 && <0.13,
               containers >=0.6 && <0.9,
               hasql ^>=1.10.1,
-              hasql-mapping,
+              hasql-mapping ^>=0.1,
               scientific >=0.3 && <0.4,
               text >=1.2 && <3,
               time >=1.9 && <2,
