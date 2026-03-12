@@ -133,7 +133,13 @@ let combineOutputs =
                                 customType.moduleName
                             )
                             customTypes
-                      , version = "0"
+                      , version =
+                              "0."
+                          ++  Natural/show input.version.major
+                          ++  "."
+                          ++  Natural/show input.version.minor
+                          ++  "."
+                          ++  Natural/show input.version.patch
                       , dbName = Deps.CodegenKit.Name.toTextInSnake input.name
                       }
 
