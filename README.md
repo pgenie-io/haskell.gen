@@ -104,9 +104,9 @@ run conn = do
   result <-
     Connection.use conn $
       runStatementByParams
-        Statements.SelectAlbumByName {
-          name = Just "Rumours"
-        }
+        Statements.SelectAlbumByName
+          { name = Just "Rumours"
+          }
 
   case result of
     Left err  -> putStrLn ("Query failed: " <> show err)
@@ -117,15 +117,16 @@ run conn = do
     Connection.use conn $
       runStatementByParams
         Statements.InsertAlbum
-          { name      = "Rumours"
-          , released  = read "1977-02-04"
-          , format    = Types.VinylAlbumFormat
-          , recording = Statements.RecordingInfo
-              { studioName   = Just "Sound Factory"
-              , city         = Just "Los Angeles"
-              , country      = Just "US"
-              , recordedDate = Nothing
-              }
+          { name = "Rumours",
+            released = read "1977-02-04",
+            format = Types.VinylAlbumFormat,
+            recording =
+              Statements.RecordingInfo
+                { studioName = Just "Sound Factory",
+                  city = Just "Los Angeles",
+                  country = Just "US",
+                  recordedDate = Nothing
+                }
           }
 
   case result2 of
