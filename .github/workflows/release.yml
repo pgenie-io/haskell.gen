@@ -1,0 +1,50 @@
+name: Release Dhall Frozen Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      version-tag:
+        description: Version tag for the release
+        required: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Resolve Dhall
+        id: resolve
+        uses: nikita-volkov/dhall-resolve.github-action@v1
+        with:
+          file: gen/Gen.dhall
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.version-tag }}
+          name: "Dhall Package ${{ inputs.version-tag }}"
+          body: |
+            ## Dhall Frozen Package Release
+
+            This release contains the frozen Dhall package with all remote imports resolved.
+
+            **Commit**: ${{ github.sha }}
+            **Workflow Run**: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            The frozen package is CORS-compliant and self-contained, suitable for direct use without network dependencies.
+          files: |
+            ${{ steps.resolve.outputs.path }}
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deployment Summary
+        run: |
+          echo "✓ Successfully deployed Dhall frozen package"
+          echo "Release Tag: ${{ inputs.version-tag }}"
+          echo "Artifact: package.dhall"
