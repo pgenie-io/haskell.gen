@@ -9,6 +9,7 @@ import qualified Data.Vector as Vector
 import qualified Hasql.Mapping.IsStatement as IsStatement
 import qualified Hasql.Mapping.IsScalar as IsScalar
 import qualified MySpace.MusicCatalogue.Types as Types
+import qualified PostgresqlTypes as Pt
 
 -- |
 -- Parameters for the @update_album_recording_returning@ query.
@@ -29,7 +30,7 @@ data UpdateAlbumRecordingReturning = UpdateAlbumRecordingReturning
   { -- | Maps to @recording@.
     recording :: Maybe (Types.RecordingInfo),
     -- | Maps to @id@.
-    id :: Maybe (Int64)
+    id :: Int64
   }
   deriving stock (Eq, Show)
 
@@ -43,7 +44,7 @@ data UpdateAlbumRecordingReturningResultRow = UpdateAlbumRecordingReturningResul
     -- | Maps to @name@.
     name :: Text,
     -- | Maps to @released@.
-    released :: Maybe (Day),
+    released :: Maybe (Pt.Date),
     -- | Maps to @format@.
     format :: Maybe (Types.AlbumFormat),
     -- | Maps to @recording@.
@@ -70,7 +71,7 @@ instance IsStatement.IsStatement UpdateAlbumRecordingReturning where
       encoder =
         mconcat
           [ (.recording) >$< Encoders.param (Encoders.nullable (IsScalar.encoder)),
-            (.id) >$< Encoders.param (Encoders.nullable (IsScalar.encoder))
+            (.id) >$< Encoders.param (Encoders.nonNullable (IsScalar.encoder))
           ]
 
       decoder =

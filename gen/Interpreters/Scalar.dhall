@@ -21,10 +21,10 @@ let run =
                 Sdk.Compiled.map
                   Primitive.Output
                   Output
-                  ( \(primitive : Primitive.Output) ->
-                      { sig = primitive.sig
-                      , encoderExp = "Encoders.${primitive.codecName}"
-                      , decoderExp = "Decoders.${primitive.codecName}"
+                  ( \(p : Primitive.Output) ->
+                      { sig = p.sig
+                      , encoderExp = p.encoderExp
+                      , decoderExp = p.decoderExp
                       }
                   )
                   (Primitive.run config primitive)

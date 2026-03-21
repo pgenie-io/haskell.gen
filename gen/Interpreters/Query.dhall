@@ -69,6 +69,7 @@ let render =
               import qualified Hasql.Mapping.IsStatement as IsStatement
               import qualified Hasql.Mapping.IsScalar as IsScalar
               import qualified ${projectNamespace}.Types as Types
+              import qualified PostgresqlTypes as Pt
 
               ${Templates.ParamsTypeDecl.run
                   { queryName

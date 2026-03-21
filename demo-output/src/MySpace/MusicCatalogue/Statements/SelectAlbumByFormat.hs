@@ -9,6 +9,7 @@ import qualified Data.Vector as Vector
 import qualified Hasql.Mapping.IsStatement as IsStatement
 import qualified Hasql.Mapping.IsScalar as IsScalar
 import qualified MySpace.MusicCatalogue.Types as Types
+import qualified PostgresqlTypes as Pt
 
 -- |
 -- Parameters for the @select_album_by_format@ query.
@@ -30,7 +31,7 @@ import qualified MySpace.MusicCatalogue.Types as Types
 --
 newtype SelectAlbumByFormat = SelectAlbumByFormat
   { -- | Maps to @format@.
-    format :: Maybe (Types.AlbumFormat)
+    format :: Types.AlbumFormat
   }
   deriving stock (Eq, Show)
 
@@ -44,7 +45,7 @@ data SelectAlbumByFormatResultRow = SelectAlbumByFormatResultRow
     -- | Maps to @name@.
     name :: Text,
     -- | Maps to @released@.
-    released :: Maybe (Day),
+    released :: Maybe (Pt.Date),
     -- | Maps to @format@.
     format :: Maybe (Types.AlbumFormat),
     -- | Maps to @recording@.
@@ -69,7 +70,7 @@ instance IsStatement.IsStatement SelectAlbumByFormat where
 
       encoder =
         mconcat
-          [ (.format) >$< Encoders.param (Encoders.nullable (IsScalar.encoder))
+          [ (.format) >$< Encoders.param (Encoders.nonNullable (IsScalar.encoder))
           ]
 
       decoder =

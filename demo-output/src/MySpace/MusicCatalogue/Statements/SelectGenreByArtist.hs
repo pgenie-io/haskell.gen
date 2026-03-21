@@ -9,6 +9,7 @@ import qualified Data.Vector as Vector
 import qualified Hasql.Mapping.IsStatement as IsStatement
 import qualified Hasql.Mapping.IsScalar as IsScalar
 import qualified MySpace.MusicCatalogue.Types as Types
+import qualified PostgresqlTypes as Pt
 
 -- |
 -- Parameters for the @select_genre_by_artist@ query.
@@ -27,7 +28,7 @@ import qualified MySpace.MusicCatalogue.Types as Types
 --
 newtype SelectGenreByArtist = SelectGenreByArtist
   { -- | Maps to @artist@.
-    artist :: Maybe (Int32)
+    artist :: Int32
   }
   deriving stock (Eq, Show)
 
@@ -57,7 +58,7 @@ instance IsStatement.IsStatement SelectGenreByArtist where
 
       encoder =
         mconcat
-          [ (.artist) >$< Encoders.param (Encoders.nullable (IsScalar.encoder))
+          [ (.artist) >$< Encoders.param (Encoders.nonNullable (IsScalar.encoder))
           ]
 
       decoder =

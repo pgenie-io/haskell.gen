@@ -25,6 +25,7 @@ let run =
         import qualified Hasql.Decoders as Decoders
         import qualified Hasql.Encoders as Encoders
         import qualified Hasql.Mapping.IsScalar as IsScalar
+        import qualified PostgresqlTypes as Pt
         ${if    Deps.Prelude.List.null Text params.customTypeModules
           then  ""
           else  Deps.Prelude.Text.concatMapSep

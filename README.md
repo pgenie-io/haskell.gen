@@ -29,7 +29,7 @@ name: music_catalogue
 version: 1.0.0
 artifacts:
   # Here
-  hasql: https://raw.githubusercontent.com/pgenie-io/haskell-hasql.gen/v0.1.0/gen/Gen.dhall
+  hasql: https://raw.githubusercontent.com/pgenie-io/haskell-hasql.gen/v0.2.0/gen/Gen.dhall
 ```
 
 Run the code generator:
@@ -44,25 +44,64 @@ The generated package will be placed in the `artifacts/hasql` as configured in y
 
 Scalar types can appear as plain values, as nullable values (`Maybe a`), or as arrays of any dimensionality (`Vector a`, `Vector (Vector a)`, …) with controllable nullability of the elements of arrays as well as of arrays themselves.
 
-| PostgreSQL type | Haskell type              |
-|-----------------|---------------------------|
-| `bool`          | `Bool`                    |
-| `bytea`         | `ByteString`              |
-| `char`          | `Char`                    |
-| `date`          | `Day`                     |
-| `float4`        | `Float`                   |
-| `float8`        | `Double`                  |
-| `int2`          | `Int16`                   |
-| `int4`          | `Int32`                   |
-| `int8`          | `Int64`                   |
-| `interval`      | `DiffTime`                |
-| `jsonb`         | `Aeson.Value`             |
-| `numeric`       | `Scientific`              |
-| `text`          | `Text`                    |
-| `timestamp`     | `LocalTime`               |
-| `timestamptz`   | `UTCTime`                 |
-| `timetz`        | `(TimeOfDay, TimeZone)`   |
-| `uuid`          | `UUID`                    |
+| PostgreSQL type        | Haskell type                                    | Notes                      |
+|------------------------|-------------------------------------------------|----------------------------|
+| `bit`                  | `Pt.Bit`                                        | postgresql-types           |
+| `bool`                 | `Bool`                                          |                            |
+| `box`                  | `Pt.Box`                                        | postgresql-types           |
+| `bpchar` / `char(n)`   | `Text`                                          |                            |
+| `bytea`                | `ByteString`                                    |                            |
+| `char`                 | `Pt.Char`                                       | postgresql-types           |
+| `cidr`                 | `Pt.Cidr`                                       | postgresql-types           |
+| `circle`               | `Pt.Circle`                                     | postgresql-types           |
+| `citext`               | `Text`                                          |                            |
+| `date`                 | `Pt.Date`                                       | postgresql-types           |
+| `datemultirange`       | `Pt.Multirange Pt.Date`                         | postgresql-types           |
+| `daterange`            | `Pt.Range Pt.Date`                              | postgresql-types           |
+| `float4`               | `Float`                                         |                            |
+| `float8`               | `Double`                                        |                            |
+| `hstore`               | `Pt.Hstore`                                     | postgresql-types           |
+| `inet`                 | `Pt.Inet`                                       | postgresql-types           |
+| `int2`                 | `Int16`                                         |                            |
+| `int4`                 | `Int32`                                         |                            |
+| `int4multirange`       | `Pt.Multirange Pt.Int4`                         | postgresql-types           |
+| `int4range`            | `Pt.Range Pt.Int4`                              | postgresql-types           |
+| `int8`                 | `Int64`                                         |                            |
+| `int8multirange`       | `Pt.Multirange Pt.Int8`                         | postgresql-types           |
+| `int8range`            | `Pt.Range Pt.Int8`                              | postgresql-types           |
+| `interval`             | `Pt.Interval`                                   | postgresql-types           |
+| `json`                 | `Pt.Json`                                       | postgresql-types           |
+| `jsonb`                | `Pt.Jsonb`                                      | postgresql-types           |
+| `line`                 | `Pt.Line`                                       | postgresql-types           |
+| `lseg`                 | `Pt.Lseg`                                       | postgresql-types           |
+| `macaddr`              | `Pt.Macaddr`                                    | postgresql-types           |
+| `macaddr8`             | `Pt.Macaddr8`                                   | postgresql-types           |
+| `money`                | `Pt.Money`                                      | postgresql-types           |
+| `name`                 | `Text`                                          |                            |
+| `numeric`              | `Pt.Numeric`                                    | postgresql-types           |
+| `nummultirange`        | `Pt.Multirange Pt.Numeric`                      | postgresql-types           |
+| `numrange`             | `Pt.Range Pt.Numeric`                           | postgresql-types           |
+| `oid`                  | `Pt.Oid`                                        | postgresql-types           |
+| `path`                 | `Pt.Path`                                       | postgresql-types           |
+| `point`                | `Pt.Point`                                      | postgresql-types           |
+| `polygon`              | `Pt.Polygon`                                    | postgresql-types           |
+| `text`                 | `Text`                                          |                            |
+| `time`                 | `Pt.Time`                                       | postgresql-types           |
+| `timestamp`            | `Pt.Timestamp`                                  | postgresql-types           |
+| `timestamptz`          | `Pt.Timestamptz`                                | postgresql-types           |
+| `timetz`               | `Pt.Timetz`                                     | postgresql-types           |
+| `tsmultirange`         | `Pt.Multirange Pt.Timestamp`                    | postgresql-types           |
+| `tsrange`              | `Pt.Range Pt.Timestamp`                         | postgresql-types           |
+| `tstzmultirange`       | `Pt.Multirange Pt.Timestamptz`                  | postgresql-types           |
+| `tstzrange`            | `Pt.Range Pt.Timestamptz`                       | postgresql-types           |
+| `tsvector`             | `Pt.Tsvector`                                   | postgresql-types           |
+| `uuid`                 | `UUID`                                          |                            |
+| `varbit`               | `Pt.Varbit`                                     | postgresql-types           |
+| `varchar`              | `Text`                                          |                            |
+
+Types marked **postgresql-types** use the [`postgresql-types`](https://hackage.haskell.org/package/postgresql-types) package for their Haskell representation. The `Pt.*` wrappers used for date/time, range, multirange, inet, and other PostgreSQL-specific scalars also come from that package, with codec instances supplied by [`hasql-postgresql-types`](https://hackage.haskell.org/package/hasql-postgresql-types).
+
+The following types are currently **not supported**: `pg_lsn`, `pg_snapshot`, `tsquery`, `xml`.
 
 User-defined **enum** and **composite** types are also supported and generate corresponding Haskell types with `IsScalar` instances.
 
@@ -85,7 +124,7 @@ Declare the dependency in your own `.cabal` file:
 ```cabal
 build-depends:
   my-space-music-catalogue,
-  hasql ^>=1.10,
+  hasql ^>=1.10.3,
   hasql-mapping ^>=0.1,
 ```
 

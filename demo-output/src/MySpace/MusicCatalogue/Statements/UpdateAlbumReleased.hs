@@ -9,6 +9,7 @@ import qualified Data.Vector as Vector
 import qualified Hasql.Mapping.IsStatement as IsStatement
 import qualified Hasql.Mapping.IsScalar as IsScalar
 import qualified MySpace.MusicCatalogue.Types as Types
+import qualified PostgresqlTypes as Pt
 
 -- |
 -- Parameters for the @update_album_released@ query.
@@ -25,9 +26,9 @@ import qualified MySpace.MusicCatalogue.Types as Types
 --
 data UpdateAlbumReleased = UpdateAlbumReleased
   { -- | Maps to @released@.
-    released :: Maybe (Day),
+    released :: Maybe (Pt.Date),
     -- | Maps to @id@.
-    id :: Maybe (Int64)
+    id :: Int64
   }
   deriving stock (Eq, Show)
 
@@ -46,7 +47,7 @@ instance IsStatement.IsStatement UpdateAlbumReleased where
       encoder =
         mconcat
           [ (.released) >$< Encoders.param (Encoders.nullable (IsScalar.encoder)),
-            (.id) >$< Encoders.param (Encoders.nullable (IsScalar.encoder))
+            (.id) >$< Encoders.param (Encoders.nonNullable (IsScalar.encoder))
           ]
 
       decoder =
