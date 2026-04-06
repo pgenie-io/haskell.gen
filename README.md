@@ -35,7 +35,7 @@ artifacts:
 Run the code generator:
 
 ```bash
-pgenie generate
+pgn generate
 ```
 
 The generated package will be placed in the `artifacts/hasql` as configured in your project. Add it to your Haskell project's `cabal.project` or `stack.yaml` as a local package.
