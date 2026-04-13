@@ -89,6 +89,11 @@ let run =
           , Varbit = isScalar "Pt.Varbit"
           , Varchar = std "Text" "varchar"
           , Xml = unsupportedType "xml"
+          , Box2D = unsupportedType "box2d"
+          , Box3D = unsupportedType "box3d"
+          , Geography = unsupportedType "geography"
+          , Geometry = unsupportedType "geometry"
+          , Ltree = unsupportedType "ltree"
           }
           input
 
