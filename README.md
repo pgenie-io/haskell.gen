@@ -46,7 +46,7 @@ Scalar types can appear as plain values, as nullable values (`Maybe a`), or as a
 
 | PostgreSQL type        | Haskell type                                    | Notes                      |
 |------------------------|-------------------------------------------------|----------------------------|
-| `bit`                  | `Pt.Bit`                                        | postgresql-types           |
+| `bit`                  | `Pt.Bit 1`                                      | postgresql-types           |
 | `bool`                 | `Bool`                                          |                            |
 | `box`                  | `Pt.Box`                                        | postgresql-types           |
 | `bpchar` / `char(n)`   | `Text`                                          |                            |
@@ -78,9 +78,9 @@ Scalar types can appear as plain values, as nullable values (`Maybe a`), or as a
 | `macaddr8`             | `Pt.Macaddr8`                                   | postgresql-types           |
 | `money`                | `Pt.Money`                                      | postgresql-types           |
 | `name`                 | `Text`                                          |                            |
-| `numeric`              | `Pt.Numeric`                                    | postgresql-types           |
-| `nummultirange`        | `Pt.Multirange Pt.Numeric`                      | postgresql-types           |
-| `numrange`             | `Pt.Range Pt.Numeric`                           | postgresql-types           |
+| `numeric`              | `Pt.Numeric 0 0`                                | postgresql-types           |
+| `nummultirange`        | `Pt.Multirange (Pt.Numeric 0 0)`                | postgresql-types           |
+| `numrange`             | `Pt.Range (Pt.Numeric 0 0)`                     | postgresql-types           |
 | `oid`                  | `Pt.Oid`                                        | postgresql-types           |
 | `path`                 | `Pt.Path`                                       | postgresql-types           |
 | `point`                | `Pt.Point`                                      | postgresql-types           |
@@ -96,10 +96,12 @@ Scalar types can appear as plain values, as nullable values (`Maybe a`), or as a
 | `tstzrange`            | `Pt.Range Pt.Timestamptz`                       | postgresql-types           |
 | `tsvector`             | `Pt.Tsvector`                                   | postgresql-types           |
 | `uuid`                 | `UUID`                                          |                            |
-| `varbit`               | `Pt.Varbit`                                     | postgresql-types           |
+| `varbit`               | `Pt.Varbit 0`                                   | postgresql-types           |
 | `varchar`              | `Text`                                          |                            |
 
 Types marked **postgresql-types** use the [`postgresql-types`](https://hackage.haskell.org/package/postgresql-types) package for their Haskell representation. The `Pt.*` wrappers used for date/time, range, multirange, inet, and other PostgreSQL-specific scalars also come from that package, with codec instances supplied by [`hasql-postgresql-types`](https://hackage.haskell.org/package/hasql-postgresql-types).
+
+Default-length and unconstrained PostgreSQL types are mapped to concrete Haskell representations where PostgreSQL defines an implicit default. For example, bare `bit` is treated as `bit(1)`, and unconstrained `numeric` is rendered as `Pt.Numeric 0 0` per the `postgresql-types` convention.
 
 The following types are currently **not supported**: `pg_lsn`, `pg_snapshot`, `tsquery`, `xml`.
 

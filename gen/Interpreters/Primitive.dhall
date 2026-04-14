@@ -33,9 +33,9 @@ let run =
       \(config : Algebra.Config) ->
       \(input : Input) ->
         merge
-          { Bit = isScalar "Bit"
+          { Bit = isScalar "Pt.Bit 1"
           , Bool = std "Bool" "bool"
-          , Box = isScalar "Box"
+          , Box = isScalar "Pt.Box"
           , Bpchar = std "Text" "bpchar"
           , Bytea = std "ByteString" "bytea"
           , Char = isScalar "Pt.Char"
@@ -65,9 +65,9 @@ let run =
           , Macaddr8 = isScalar "Pt.Macaddr8"
           , Money = isScalar "Pt.Money"
           , Name = std "Text" "name"
-          , Numeric = std "Scientific" "numeric"
-          , Nummultirange = isScalar "Pt.Multirange Pt.Numeric"
-          , Numrange = isScalar "Pt.Range Pt.Numeric"
+          , Numeric = isScalar "Pt.Numeric 0 0"
+          , Nummultirange = isScalar "Pt.Multirange (Pt.Numeric 0 0)"
+          , Numrange = isScalar "Pt.Range (Pt.Numeric 0 0)"
           , Oid = isScalar "Pt.Oid"
           , Path = isScalar "Pt.Path"
           , PgLsn = unsupportedType "pg_lsn"
@@ -86,7 +86,7 @@ let run =
           , Tstzrange = isScalar "Pt.Range Pt.Timestamptz"
           , Tsvector = isScalar "Pt.Tsvector"
           , Uuid = std "UUID" "uuid"
-          , Varbit = isScalar "Pt.Varbit"
+          , Varbit = isScalar "Pt.Varbit 0"
           , Varchar = std "Text" "varchar"
           , Xml = unsupportedType "xml"
           , Box2D = unsupportedType "box2d"

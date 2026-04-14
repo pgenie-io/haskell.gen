@@ -16,7 +16,7 @@ let Sdk = Deps.Sdk
 
 let Gen = ./Gen.dhall
 
-let project = Sdk.Fixtures._1
+let project = Sdk.Fixtures.Demo
 
 let config
     : Gen.Config
