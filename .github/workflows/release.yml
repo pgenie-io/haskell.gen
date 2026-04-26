@@ -26,7 +26,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ inputs.version-tag }}
-          name: "Dhall Package ${{ inputs.version-tag }}"
+          name: "${{ inputs.version-tag }}"
           body: |
             ## Dhall Frozen Package Release
 
