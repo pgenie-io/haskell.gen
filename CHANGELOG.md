@@ -1,4 +1,4 @@
-# Upcoming
+# v0.3.0
 
 ## Breaking
 
