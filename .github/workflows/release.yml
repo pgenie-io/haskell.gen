@@ -107,8 +107,8 @@ jobs:
             exit 1
           fi
 
-          if grep -qE 'https://raw.githubusercontent.com/pgenie-io/java.gen/v[0-9]+\.[0-9]+\.[0-9]+/gen/Gen.dhall' README.md; then
-            sed -i -E 's|https://raw.githubusercontent.com/pgenie-io/java.gen/v[0-9]+\.[0-9]+\.[0-9]+/gen/Gen.dhall|https://raw.githubusercontent.com/pgenie-io/java.gen/v${{ inputs.version }}/gen/Gen.dhall|g' README.md
+          if grep -qE 'https://github.com/pgenie-io/haskell.gen/releases/download/v[0-9]+\.[0-9]+\.[0-9]+/resolved.dhall' README.md; then
+            sed -i -E 's|https://github.com/pgenie-io/haskell.gen/releases/download/v[0-9]+\.[0-9]+\.[0-9]+/resolved.dhall|https://github.com/pgenie-io/haskell.gen/releases/download/v${{ inputs.version }}/resolved.dhall|g' README.md
             needs_commit=true
           fi
 
