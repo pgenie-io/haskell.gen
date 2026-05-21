@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+  workflow_call:
+    inputs:
+      ref:
+        description: Git ref to test (defaults to current SHA)
+        required: false
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.ref || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  discover-tests:
+    name: Discover test entries
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.discover.outputs.matrix }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+
+      - name: Build matrix from tests directory
+        id: discover
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          shopt -s nullglob
+          entries=(tests/*)
+
+          if [[ ${#entries[@]} -eq 0 ]]; then
+            echo "::error::No entries were found under tests/."
+            exit 1
+          fi
+
+          matrix='{"include":['
+          first=true
+
+          for entry in "${entries[@]}"; do
+            if [[ ! -f "$entry" ]]; then
+              echo "::error::tests entry '$entry' is not a file."
+              exit 1
+            fi
+
+            output_dir="generated-output/$(basename "${entry%.*}")"
+
+            if [[ "$first" == true ]]; then
+              first=false
+            else
+              matrix+=','
+            fi
+
+            matrix+="{\"entry\":\"$entry\",\"output_dir\":\"$output_dir\"}"
+          done
+
+          matrix+=']}'
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
+  ci:
+    name: Generate and verify (${{ matrix.entry }})
+    needs: discover-tests
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.discover-tests.outputs.matrix) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+
+      - name: Clean up existing generated output
+        run: |
+          rm -rf "${{ matrix.output_dir }}"
+          mkdir -p "${{ matrix.output_dir }}"
+
+      - name: Generate output from Dhall
+        uses: nikita-volkov/dhall-directory-tree.github-action@v2
+        with:
+          dhall_file: ${{ matrix.entry }}
+          output_dir: ${{ matrix.output_dir }}
+
+      - name: Set up Haskell toolchain
+        uses: haskell-actions/setup@v2
+
+      - name: Verify generated package
+        working-directory: ${{ matrix.output_dir }}
+        run: cabal test all
