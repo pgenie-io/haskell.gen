@@ -15,7 +15,6 @@
 
 # Unignore subtrees:
 !/.github/
-!/demo-output/
 !/gen/
 
 # Ignore noise:
