@@ -37,7 +37,7 @@ let run =
         -- |
         -- Representation of the @${params.pgTypeName}@ user-declared PostgreSQL record type.
         data ${params.typeName} = ${params.typeName}
-          { ${Deps.Lude.Extensions.Text.indent
+          { ${Deps.Lude.Text.indent
                 4
                 ( Deps.Prelude.Text.concatSep
                     ''
@@ -54,7 +54,7 @@ let run =
               (Just "${params.pgSchema}")
               "${params.pgTypeName}"
               ( mconcat
-                  [ ${Deps.Lude.Extensions.Text.indent
+                  [ ${Deps.Lude.Text.indent
                         12
                         ( Deps.Prelude.Text.concatSep
                             ''
@@ -70,7 +70,7 @@ let run =
               (Just "${params.pgSchema}")
               "${params.pgTypeName}"
               ( ${params.typeName}
-                  <$> ${Deps.Lude.Extensions.Text.indent
+                  <$> ${Deps.Lude.Text.indent
                           10
                           ( Deps.Prelude.Text.concatMapSep
                               ''

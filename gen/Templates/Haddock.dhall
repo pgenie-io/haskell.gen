@@ -11,9 +11,7 @@ in  Algebra.module
             { None = ""
             , Some =
                 \(text : Text) ->
-                      "-- | "
-                  ++  Deps.Lude.Extensions.Text.prefixEachLine "-- " text
-                  ++  "\n"
+                  "-- | " ++ Deps.Lude.Text.prefixEachLine "-- " text ++ "\n"
             }
             params
       )

@@ -1,6 +1,6 @@
 { Prelude = ./Prelude.dhall
 , Lude = ./Lude.dhall
-, CodegenKit = ./CodegenKit.dhall
-, Sdk = ./Sdk.dhall
+, GenSdk = ./GenSdk.dhall
+, Project = ./Project.dhall
 , Typeclasses = ./Typeclasses.dhall
 }

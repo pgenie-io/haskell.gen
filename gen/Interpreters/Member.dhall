@@ -2,15 +2,13 @@ let Deps = ../Deps/package.dhall
 
 let Algebra = ./Algebra/package.dhall
 
-let Sdk = Deps.Sdk
-
-let Model = Deps.Sdk.Project
+let Project = Deps.Project
 
 let Value = ./Value.dhall
 
 let Templates = ../Templates/package.dhall
 
-let Input = Model.Member
+let Input = Project.Member
 
 let Output =
       { fieldName : Text
@@ -22,16 +20,16 @@ let Output =
 let run =
       \(config : Algebra.Config) ->
       \(input : Input) ->
-        Sdk.Compiled.flatMap
+        Deps.Lude.Compiled.flatMap
           Value.Output
           Output
           ( \(value : Value.Output) ->
-              let fieldName = Deps.CodegenKit.Name.toTextInCamel input.name
+              let fieldName = input.name.inCamelCase
 
               let dimensionality =
                     merge
                       { Some =
-                          \(arraySettings : Model.ArraySettings) ->
+                          \(arraySettings : Project.ArraySettings) ->
                             arraySettings.dimensionality
                       , None = 0
                       }
@@ -40,7 +38,7 @@ let run =
               let elementIsNullable =
                     merge
                       { Some =
-                          \(arraySettings : Model.ArraySettings) ->
+                          \(arraySettings : Project.ArraySettings) ->
                             arraySettings.elementIsNullable
                       , None = True
                       }
@@ -50,7 +48,7 @@ let run =
 
               let sig = if input.isNullable then "Maybe (${sig})" else sig
 
-              in  Sdk.Compiled.ok
+              in  Deps.Lude.Compiled.ok
                     Output
                     { fieldName
                     , fieldEncoder =
@@ -76,7 +74,7 @@ let run =
                           }
                     }
           )
-          ( Sdk.Compiled.nest
+          ( Deps.Lude.Compiled.nest
               Value.Output
               input.pgName
               (Value.run config input.value)

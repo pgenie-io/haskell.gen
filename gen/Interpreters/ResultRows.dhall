@@ -6,7 +6,9 @@ let Templates = ../Templates/package.dhall
 
 let Member = ./Member.dhall
 
-let Input = Deps.Sdk.Project.ResultRows
+let Project = Deps.Project
+
+let Input = Project.ResultRows
 
 let Output = Text -> { decoderExp : Text, typeDecls : Text }
 
@@ -15,21 +17,18 @@ let run =
       \(input : Input) ->
         let compiledColumns =
               Deps.Typeclasses.Classes.Applicative.traverseList
-                Deps.Sdk.Compiled.Type
-                Deps.Sdk.Compiled.applicative
-                Deps.Sdk.Project.Member
+                Deps.Lude.Compiled.Type
+                Deps.Lude.Compiled.applicative
+                Project.Member
                 Member.Output
                 (Member.run config)
-                ( Deps.Prelude.NonEmpty.toList
-                    Deps.Sdk.Project.Member
-                    input.columns
-                )
+                (Deps.Prelude.NonEmpty.toList Project.Member input.columns)
 
-        in  Deps.Sdk.Compiled.flatMap
+        in  Deps.Lude.Compiled.flatMap
               (List Member.Output)
               Output
               ( \(columns : List Member.Output) ->
-                  Deps.Sdk.Compiled.ok
+                  Deps.Lude.Compiled.ok
                     Output
                     ( \(typeNameBase : Text) ->
                         let rowTypeName = "${typeNameBase}ResultRow"
@@ -52,7 +51,7 @@ let run =
                         let rowDecoderExp =
                               ''
                               do
-                                ${Deps.Lude.Extensions.Text.indent
+                                ${Deps.Lude.Text.indent
                                     2
                                     ( Deps.Prelude.Text.concatMap
                                         Member.Output

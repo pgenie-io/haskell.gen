@@ -4,11 +4,13 @@ let Algebra = ./Algebra/package.dhall
 
 let ResultRows = ./ResultRows.dhall
 
-let Input = Deps.Sdk.Project.Result
+let Project = Deps.Project
+
+let Input = Project.Result
 
 let Output = Text -> { typeDecls : Text, decoderExp : Text }
 
-let Result = Deps.Sdk.Compiled.Type Output
+let Result = Deps.Lude.Compiled.Type Output
 
 let run =
       \(config : Algebra.Config) ->
@@ -18,7 +20,7 @@ let run =
           input
           Result
           (ResultRows.run config)
-          ( Deps.Sdk.Compiled.ok
+          ( Deps.Lude.Compiled.ok
               Output
               ( \(typeNameBase : Text) ->
                   { typeDecls =

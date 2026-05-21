@@ -6,8 +6,6 @@ let Lude = Deps.Lude
 
 let Typeclasses = Deps.Typeclasses
 
-let Sdk = Deps.Sdk
-
 let Templates = ../Templates/package.dhall
 
 let ResultModule = ./Result.dhall
@@ -16,7 +14,7 @@ let QueryFragmentsModule = ./QueryFragments.dhall
 
 let MemberModule = ./Member.dhall
 
-let Input = Deps.Sdk.Project.Query
+let Input = Deps.Project.Query
 
 let Output =
       { statementModuleName : Text
@@ -33,7 +31,7 @@ let render =
       \(result : ResultModule.Output) ->
       \(fragments : QueryFragmentsModule.Output) ->
       \(params : List MemberModule.Output) ->
-        let statementModuleName = Deps.CodegenKit.Name.toTextInPascal input.name
+        let statementModuleName = input.name.inPascalCase
 
         let statementModuleNamespaceAsList =
               config.rootNamespace # [ "Statements", statementModuleName ]
@@ -54,7 +52,7 @@ let render =
         let projectNamespace =
               Deps.Prelude.Text.concatSep "." config.rootNamespace
 
-        let queryName = Deps.CodegenKit.Name.toTextInSnake input.name
+        let queryName = input.name.inSnakeCase
 
         let statementModuleContents =
               ''
@@ -92,11 +90,11 @@ let render =
                 statement = Statement.preparable sql encoder decoder
                   where
                     sql =
-                      ${Deps.Lude.Extensions.Text.indent 8 fragments.exp}
+                      ${Deps.Lude.Text.indent 8 fragments.exp}
 
                     encoder =
                       mconcat
-                        [ ${Lude.Extensions.Text.indent
+                        [ ${Lude.Text.indent
                               12
                               ( Deps.Prelude.Text.concatMapSep
                                   ''
@@ -111,7 +109,7 @@ let render =
                         ]
 
                     decoder =
-                      ${Deps.Lude.Extensions.Text.indent 8 result.decoderExp}
+                      ${Deps.Lude.Text.indent 8 result.decoderExp}
 
               ''
 
@@ -130,34 +128,34 @@ let render =
 let run =
       \(config : Algebra.Config) ->
       \(input : Input) ->
-        Sdk.Compiled.nest
+        Deps.Lude.Compiled.nest
           Output
           input.srcPath
           ( Typeclasses.Classes.Applicative.map3
-              Sdk.Compiled.Type
-              Sdk.Compiled.applicative
+              Deps.Lude.Compiled.Type
+              Deps.Lude.Compiled.applicative
               ResultModule.Output
               QueryFragmentsModule.Output
               (List MemberModule.Output)
               Output
               (render config input)
-              ( Sdk.Compiled.nest
+              ( Deps.Lude.Compiled.nest
                   ResultModule.Output
                   "result"
                   (ResultModule.run config input.result)
               )
-              ( Sdk.Compiled.nest
+              ( Deps.Lude.Compiled.nest
                   QueryFragmentsModule.Output
                   "sql"
                   (QueryFragmentsModule.run config input.fragments)
               )
-              ( Sdk.Compiled.nest
+              ( Deps.Lude.Compiled.nest
                   (List MemberModule.Output)
                   "params"
                   ( Typeclasses.Classes.Applicative.traverseList
-                      Sdk.Compiled.Type
-                      Sdk.Compiled.applicative
-                      Deps.Sdk.Project.Member
+                      Deps.Lude.Compiled.Type
+                      Deps.Lude.Compiled.applicative
+                      Deps.Project.Member
                       MemberModule.Output
                       (MemberModule.run config)
                       input.params

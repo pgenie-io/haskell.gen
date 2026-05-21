@@ -1,20 +1,14 @@
-let Deps = ./Deps/package.dhall
-
-let Sdk = Deps.Sdk
-
-let CodegenKit = Deps.CodegenKit
+let Project = ./Deps/Project.dhall
 
 let Config = ./Config.dhall
 
 let ProjectInterpreter = ./Interpreters/Project.dhall
 
 in  \(config : Optional Config) ->
-    \(project : Sdk.Project.Project) ->
+    \(project : Project.Project) ->
       let interpreterConfig =
             { rootNamespace =
-              [ CodegenKit.Name.toTextInPascal project.space
-              , CodegenKit.Name.toTextInPascal project.name
-              ]
+              [ project.space.inPascalCase, project.name.inPascalCase ]
             }
 
       in  ProjectInterpreter.run interpreterConfig project

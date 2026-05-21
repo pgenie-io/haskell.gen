@@ -2,9 +2,7 @@ let Deps = ../Deps/package.dhall
 
 let Algebra = ./Algebra/package.dhall
 
-let Sdk = Deps.Sdk
-
-let Model = Deps.Sdk.Project
+let Project = Deps.Project
 
 let Templates = ../Templates/package.dhall
 
@@ -12,9 +10,9 @@ let QueryGen = ./Query.dhall
 
 let CustomTypeGen = ./CustomType.dhall
 
-let Input = Model.Project
+let Input = Project.Project
 
-let Output = List Sdk.File.Type
+let Output = List Deps.Lude.File.Type
 
 let combineOutputs =
       \(config : Algebra.Config) ->
@@ -27,10 +25,10 @@ let combineOutputs =
         let rootNamespace = Deps.Prelude.Text.concatSep "." config.rootNamespace
 
         let customTypeFiles
-            : List Sdk.File.Type
+            : List Deps.Lude.File.Type
             = Deps.Prelude.List.map
                 CustomTypeGen.Output
-                Sdk.File.Type
+                Deps.Lude.File.Type
                 ( \(customType : CustomTypeGen.Output) ->
                     { path = customType.modulePath
                     , content = customType.moduleContent
@@ -39,10 +37,10 @@ let combineOutputs =
                 customTypes
 
         let statementFiles
-            : List Sdk.File.Type
+            : List Deps.Lude.File.Type
             = Deps.Prelude.List.map
                 QueryGen.Output
-                Sdk.File.Type
+                Deps.Lude.File.Type
                 ( \(query : QueryGen.Output) ->
                     { path = query.statementModulePath
                     , content = query.statementModuleContents
@@ -50,15 +48,16 @@ let combineOutputs =
                 )
                 queries
 
-        let preludeFile =
-              { path =
+        let preludeFile
+            : Deps.Lude.File.Type
+            = { path =
                   Templates.ModulePath.run
                     { namespace = config.rootNamespace # [ "Prelude" ] }
               , content = Templates.PreludeModule.run { projectNamespace }
               }
 
         let customTypesFile
-            : Sdk.File.Type
+            : Deps.Lude.File.Type
             = { path =
                   Templates.ModulePath.run
                     { namespace = config.rootNamespace # [ "Types" ] }
@@ -80,7 +79,7 @@ let combineOutputs =
               }
 
         let statementsFile
-            : Sdk.File.Type
+            : Deps.Lude.File.Type
             = { path =
                   Templates.ModulePath.run
                     { namespace = config.rootNamespace # [ "Statements" ] }
@@ -105,11 +104,9 @@ let combineOutputs =
               }
 
         let cabalFile
-            : Sdk.File.Type
+            : Deps.Lude.File.Type
             = let packageName =
-                    Deps.CodegenKit.Name.concat input.space [ input.name ]
-
-              let packageName = Deps.CodegenKit.Name.toTextInKebab packageName
+                    input.space.inKebabCase ++ "-" ++ input.name.inKebabCase
 
               let path = packageName ++ ".cabal"
 
@@ -140,7 +137,7 @@ let combineOutputs =
                           ++  Natural/show input.version.minor
                           ++  "."
                           ++  Natural/show input.version.patch
-                      , dbName = Deps.CodegenKit.Name.toTextInSnake input.name
+                      , dbName = input.name.inSnakeCase
                       }
 
               in  { path, content }
@@ -148,47 +145,47 @@ let combineOutputs =
         in      [ cabalFile, preludeFile, customTypesFile, statementsFile ]
               # customTypeFiles
               # statementFiles
-            : List Sdk.File.Type
+            : List Deps.Lude.File.Type
 
 let run =
       \(config : Algebra.Config) ->
       \(input : Input) ->
         let compiledQueries
-            : Sdk.Compiled.Type (List (Optional QueryGen.Output))
-            = Sdk.Compiled.traverseList
-                Deps.Sdk.Project.Query
+            : Deps.Lude.Compiled.Type (List (Optional QueryGen.Output))
+            = Deps.Lude.Compiled.traverseList
+                Project.Query
                 (Optional QueryGen.Output)
-                ( \(query : Deps.Sdk.Project.Query) ->
+                ( \(query : Project.Query) ->
                     Deps.Typeclasses.Classes.Alternative.optional
-                      Sdk.Compiled.Type
-                      Sdk.Compiled.alternative
+                      Deps.Lude.Compiled.Type
+                      Deps.Lude.Compiled.alternative
                       QueryGen.Output
                       (QueryGen.run config query)
                 )
                 input.queries
 
         let compiledQueries
-            : Sdk.Compiled.Type (List QueryGen.Output)
-            = Sdk.Compiled.map
+            : Deps.Lude.Compiled.Type (List QueryGen.Output)
+            = Deps.Lude.Compiled.map
                 (List (Optional QueryGen.Output))
                 (List QueryGen.Output)
                 (Deps.Prelude.List.unpackOptionals QueryGen.Output)
                 compiledQueries
 
         let compiledTypes
-            : Sdk.Compiled.Type (List CustomTypeGen.Output)
-            = Sdk.Compiled.traverseList
-                Deps.Sdk.Project.CustomType
+            : Deps.Lude.Compiled.Type (List CustomTypeGen.Output)
+            = Deps.Lude.Compiled.traverseList
+                Project.CustomType
                 CustomTypeGen.Output
                 (CustomTypeGen.run config)
                 input.customTypes
 
         let files
-            : Sdk.Compiled.Type (List Sdk.File.Type)
-            = Sdk.Compiled.map2
+            : Deps.Lude.Compiled.Type (List Deps.Lude.File.Type)
+            = Deps.Lude.Compiled.map2
                 (List QueryGen.Output)
                 (List CustomTypeGen.Output)
-                (List Sdk.File.Type)
+                (List Deps.Lude.File.Type)
                 (combineOutputs config input)
                 compiledQueries
                 compiledTypes

@@ -2,15 +2,13 @@ let Deps = ../Deps/package.dhall
 
 let Algebra = ./Algebra/package.dhall
 
-let Sdk = Deps.Sdk
-
-let Model = Deps.Sdk.Project
+let Project = Deps.Project
 
 let Templates = ../Templates/package.dhall
 
 let MemberGen = ./Member.dhall
 
-let Input = Model.CustomType
+let Input = Project.CustomType
 
 let Output =
       { moduleName : Text
@@ -24,11 +22,10 @@ in  Algebra.module
       Output
       ( \(config : Algebra.Config) ->
         \(input : Input) ->
-          let moduleName = Deps.CodegenKit.Name.toTextInPascal input.name
+          let moduleName = input.name.inPascalCase
 
           let moduleNamespaceAsList =
-                  config.rootNamespace
-                # [ "Types", Deps.CodegenKit.Name.toTextInPascal input.name ]
+                config.rootNamespace # [ "Types", input.name.inPascalCase ]
 
           let moduleNamespace =
                 Deps.Prelude.Text.concatSep "." moduleNamespaceAsList
@@ -43,11 +40,11 @@ in  Algebra.module
 
           in  merge
                 { Composite =
-                    \(members : List Model.Member) ->
+                    \(members : List Project.Member) ->
                       let compiledMembers
-                          : Sdk.Compiled.Type (List MemberGen.Output)
-                          = Sdk.Compiled.traverseList
-                              Model.Member
+                          : Deps.Lude.Compiled.Type (List MemberGen.Output)
+                          = Deps.Lude.Compiled.traverseList
+                              Project.Member
                               MemberGen.Output
                               (MemberGen.run config)
                               members
@@ -55,21 +52,20 @@ in  Algebra.module
                       let customTypeModules
                           : List Text
                           = Deps.Prelude.List.mapMaybe
-                              Model.Member
+                              Project.Member
                               Text
-                              ( \(member : Model.Member) ->
+                              ( \(member : Project.Member) ->
                                   merge
                                     { Primitive =
-                                        \(_ : Model.Primitive) -> None Text
+                                        \(_ : Project.Primitive) -> None Text
                                     , Custom =
-                                        \(name : Model.Name) ->
+                                        \(name : Project.Name) ->
                                           Some
                                             ( Deps.Prelude.Text.concatSep
                                                 "."
                                                 (   config.rootNamespace
                                                   # [ "Types"
-                                                    , Deps.CodegenKit.Name.toTextInPascal
-                                                        name
+                                                    , name.inPascalCase
                                                     ]
                                                 )
                                             )
@@ -79,8 +75,8 @@ in  Algebra.module
                               members
 
                       let compiledOutput
-                          : Sdk.Compiled.Type Output
-                          = Sdk.Compiled.map
+                          : Deps.Lude.Compiled.Type Output
+                          = Deps.Lude.Compiled.map
                               (List MemberGen.Output)
                               Output
                               ( \(members : List MemberGen.Output) ->
@@ -127,8 +123,8 @@ in  Algebra.module
 
                       in  compiledOutput
                 , Enum =
-                    \(variants : List Model.EnumVariant) ->
-                      Sdk.Compiled.ok
+                    \(variants : List Project.EnumVariant) ->
+                      Deps.Lude.Compiled.ok
                         Output
                         { moduleName
                         , moduleNamespace
@@ -142,12 +138,10 @@ in  Algebra.module
                               , pgTypeName = input.pgName
                               , variants =
                                   Deps.Prelude.List.map
-                                    Model.EnumVariant
+                                    Project.EnumVariant
                                     Templates.CustomEnumTypeModule.Variant
-                                    ( \(variant : Model.EnumVariant) ->
-                                        { name =
-                                            Deps.CodegenKit.Name.toTextInPascal
-                                              variant.name
+                                    ( \(variant : Project.EnumVariant) ->
+                                        { name = variant.name.inPascalCase
                                         , pgValue = variant.pgName
                                         }
                                     )
@@ -155,8 +149,8 @@ in  Algebra.module
                               }
                         }
                 , Domain =
-                    \(value : Model.Value) ->
-                      Sdk.Compiled.message
+                    \(value : Project.Value) ->
+                      Deps.Lude.Compiled.message
                         Output
                         "Domain types are not yet supported."
                 }

@@ -7,7 +7,7 @@ let run =
         then  params.elementSig
         else  let base =
                     if    params.elementIsNullable
-                    then  "Maybe ${params.elementSig}"
+                    then  "Maybe (${params.elementSig})"
                     else  params.elementSig
 
               let arraySig =

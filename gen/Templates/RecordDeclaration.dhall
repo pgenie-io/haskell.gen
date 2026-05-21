@@ -12,7 +12,7 @@ in  Algebra.module
           in  if    Deps.Prelude.Natural.greaterThan length 1
               then  ''
                     data ${params.name} = ${params.name}
-                      { ${Deps.Lude.Extensions.Text.indent
+                      { ${Deps.Lude.Text.indent
                             4
                             ( Deps.Prelude.Text.concatSep
                                 ''
@@ -27,7 +27,7 @@ in  Algebra.module
                           \(field : Text) ->
                             ''
                             newtype ${params.name} = ${params.name}
-                              { ${Deps.Lude.Extensions.Text.indent 4 field}
+                              { ${Deps.Lude.Text.indent 4 field}
                               }''
                       }
                       (List/head Text params.fields)

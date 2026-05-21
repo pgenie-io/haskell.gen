@@ -38,7 +38,7 @@ in      Algebra.module
                                   Text
                                   ( \(header : Text) ->
                                           "-- ** "
-                                      ++  Deps.Lude.Extensions.Text.prefixEachLine
+                                      ++  Deps.Lude.Text.prefixEachLine
                                             "-- "
                                             header
                                       ++  "\n"
@@ -51,7 +51,7 @@ in      Algebra.module
 
               in  ''
                   ${haddock}module ${params.namespace} 
-                    ( ${Deps.Lude.Extensions.Text.indent 4 exportsBlock}
+                    ( ${Deps.Lude.Text.indent 4 exportsBlock}
                     )
                   where
 

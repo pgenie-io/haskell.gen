@@ -26,7 +26,7 @@ let run =
         -- |
         -- Representation of the @${params.pgTypeName}@ user-declared PostgreSQL enumeration type.
         data ${params.typeName}
-          = ${Deps.Lude.Extensions.Text.indent
+          = ${Deps.Lude.Text.indent
                 2
                 ( Deps.Prelude.Text.concatMapSep
                     ''
@@ -48,7 +48,7 @@ let run =
               (Just "${params.pgSchema}")
               "${params.pgTypeName}"
               ( \case
-                  ${Deps.Lude.Extensions.Text.indent
+                  ${Deps.Lude.Text.indent
                       10
                       ( Deps.Prelude.Text.concatMapSep
                           "\n"
@@ -65,7 +65,7 @@ let run =
               (Just "${params.pgSchema}")
               "${params.pgTypeName}"
               ( \case
-                  ${Deps.Lude.Extensions.Text.indent
+                  ${Deps.Lude.Text.indent
                       10
                       ( Deps.Prelude.Text.concatMapSep
                           "\n"

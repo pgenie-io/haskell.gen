@@ -2,13 +2,11 @@ let Deps = ../Deps/package.dhall
 
 let Algebra = ./Algebra/package.dhall
 
-let Sdk = Deps.Sdk
-
-let Model = Deps.Sdk.Project
+let Project = Deps.Project
 
 let Primitive = ./Primitive.dhall
 
-let Input = Model.Scalar
+let Input = Project.Scalar
 
 let Output = { sig : Text, encoderExp : Text, decoderExp : Text }
 
@@ -17,8 +15,8 @@ let run =
       \(input : Input) ->
         merge
           { Primitive =
-              \(primitive : Model.Primitive) ->
-                Sdk.Compiled.map
+              \(primitive : Project.Primitive) ->
+                Deps.Lude.Compiled.map
                   Primitive.Output
                   Output
                   ( \(p : Primitive.Output) ->
@@ -29,16 +27,12 @@ let run =
                   )
                   (Primitive.run config primitive)
           , Custom =
-              \(name : Model.Name) ->
-                Sdk.Compiled.ok
+              \(name : Project.Name) ->
+                Deps.Lude.Compiled.ok
                   Output
-                  { sig = "Types.${Deps.CodegenKit.Name.toTextInPascal name}"
-                  , encoderExp =
-                      "IsScalar.encoder @${Deps.CodegenKit.Name.toTextInCamel
-                                             name}"
-                  , decoderExp =
-                      "IsScalar.decoder @${Deps.CodegenKit.Name.toTextInCamel
-                                             name}"
+                  { sig = "Types.${name.inPascalCase}"
+                  , encoderExp = "IsScalar.encoder @${name.inCamelCase}"
+                  , decoderExp = "IsScalar.decoder @${name.inCamelCase}"
                   }
           }
           input

@@ -21,9 +21,7 @@ in  Algebra.module
           --
           -- ==== SQL Template
           --
-          -- > ${Deps.Lude.Extensions.Text.prefixEachLine
-                   "-- > "
-                   params.sqlForDocs}
+          -- > ${Deps.Lude.Text.prefixEachLine "-- > " params.sqlForDocs}
           --
           -- ==== Source Path
           --

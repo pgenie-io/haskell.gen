@@ -16,6 +16,7 @@
 # Unignore subtrees:
 !/.github/
 !/gen/
+!/tests/
 
 # Ignore noise:
 .DS_Store

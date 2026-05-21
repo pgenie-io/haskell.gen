@@ -2,33 +2,31 @@ let Deps = ../Deps/package.dhall
 
 let Algebra = ./Algebra/package.dhall
 
-let Sdk = Deps.Sdk
-
-let Model = Deps.Sdk.Project
+let Project = Deps.Project
 
 let Templates = ../Templates/package.dhall
 
 let Scalar = ./Scalar.dhall
 
-let Input = Model.Value
+let Input = Project.Value
 
 let Output = { sig : Text, encoderExp : Text, decoderExp : Text }
 
-let Result = Sdk.Compiled.Type Output
+let Result = Deps.Lude.Compiled.Type Output
 
 let run =
       \(config : Algebra.Config) ->
       \(input : Input) ->
-        Sdk.Compiled.flatMap
+        Deps.Lude.Compiled.flatMap
           Scalar.Output
           Output
           ( \(scalar : Scalar.Output) ->
               Deps.Prelude.Optional.fold
-                Model.ArraySettings
+                Project.ArraySettings
                 input.arraySettings
                 Result
-                ( \(arraySettings : Model.ArraySettings) ->
-                    Sdk.Compiled.ok
+                ( \(arraySettings : Project.ArraySettings) ->
+                    Deps.Lude.Compiled.ok
                       Output
                       { sig =
                           Templates.DimensionalityType.run
@@ -53,7 +51,7 @@ let run =
                             }
                       }
                 )
-                ( Sdk.Compiled.ok
+                ( Deps.Lude.Compiled.ok
                     Output
                     { sig = scalar.sig
                     , encoderExp = scalar.encoderExp

@@ -2,18 +2,20 @@ let Deps = ../Deps/package.dhall
 
 let Algebra = ./Algebra/package.dhall
 
-let Input = Deps.Sdk.Project.Primitive
+let Project = Deps.Project
+
+let Input = Project.Primitive
 
 let Output = { sig : Text, encoderExp : Text, decoderExp : Text }
 
 let unsupportedType =
       \(type : Text) ->
-        Deps.Sdk.Compiled.report Output [ type ] "Unsupported type"
+        Deps.Lude.Compiled.report Output [ type ] "Unsupported type"
 
 let std =
       \(sig : Text) ->
       \(codecName : Text) ->
-        Deps.Sdk.Compiled.ok
+        Deps.Lude.Compiled.ok
           Output
           { sig
           , encoderExp = "Encoders.${codecName}"
@@ -22,7 +24,7 @@ let std =
 
 let isScalar =
       \(sig : Text) ->
-        Deps.Sdk.Compiled.ok
+        Deps.Lude.Compiled.ok
           Output
           { sig
           , encoderExp = "IsScalar.encoder"
