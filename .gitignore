@@ -11,6 +11,7 @@
 !/LICENSE
 !/README.md
 !/CHANGELOG.md
+!/AGENTS.md
 
 # Unignore subtrees:
 !/.github/
