@@ -188,9 +188,11 @@ When embedding a variable in a string, use Dhall string interpolation (`${expr}`
 Bad: `"Optional<" ++ boxedType ++ ">"`
 Good: `"Optional<${boxedType}>"`
 
-### Indentation via `indent`, never manual
+### Indent via `indentNonEmpty`, never manually
 
-Never embed indentation in generated string fragments using `${"    "}` padding or hardcoded leading spaces. Instead, produce the string content without indentation and apply `Deps.Lude.Extensions.Text.indent` at the splice site.
+Lude.Text.indentNonEmpty indents all non-empty lines of a string except the first line.
+
+Never embed indentation in generated string fragments using `${"    "}` padding or hardcoded leading spaces. Instead, produce the string content without indentation and apply `Lude.Text.indentNonEmpty` at the splice site.
 
 Bad (in fragment builder):
 ```dhall
@@ -211,9 +213,9 @@ Good (fragment builder produces unindented content, splice site indents):
 ${fieldType} ${fieldName}''
 
 -- splice site:
-Deps.Lude.Extensions.Text.indent 8 fragment
+Lude.Text.indentNonEmpty 8 fragment
 ```
 
 ### Indentation belongs at the splice site, not the construction site
 
-Any string that is meant to be spliced into another string must be constructed without indentation. The `Deps.Lude.Extensions.Text.indent` utility must be applied where the string is spliced into its surrounding context. This eliminates coupling between the string builder and the indentation level of the context it lands in.
+Any string that is meant to be spliced into another string must be constructed without indentation. The `Lude.Text.indentNonEmpty` utility must be applied where the string is spliced into its surrounding context. This eliminates coupling between the string builder and the indentation level of the context it lands in.
