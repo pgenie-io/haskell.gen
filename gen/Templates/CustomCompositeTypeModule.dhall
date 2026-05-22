@@ -81,7 +81,6 @@ let run =
                               params.fieldDecoderExps
                           )}
               )
-          
         ''
 
 in  Algebra.module Params run

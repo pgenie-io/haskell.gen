@@ -21,6 +21,11 @@ let Output =
       , statementModuleNamespace : Text
       , statementModulePath : Text
       , statementModuleContents : Text
+      , defaultParams : Text
+      , statementTestModuleName : Text
+      , statementTestModuleNamespace : Text
+      , statementTestModulePath : Text
+      , statementTestModuleContents : Text
       , statementsModuleReexportedModule :
           Templates.ReexportModule.ReexportedModule
       }
@@ -47,12 +52,42 @@ let render =
 
         let statementResultTypeName = statementModuleName ++ "Result"
 
+        let statementTestModuleName = statementModuleName ++ "Spec"
+
+        let statementTestModuleNamespaceAsList =
+              config.rootNamespace # [ "Statements", statementTestModuleName ]
+
+        let statementTestModuleNamespace =
+              Deps.Prelude.Text.concatSep "." statementTestModuleNamespaceAsList
+
+        let statementTestModulePath =
+                  "test/"
+              ++  Deps.Prelude.Text.concatSep
+                    "/"
+                    statementTestModuleNamespaceAsList
+              ++  ".hs"
+
         let result = result statementModuleName
 
         let projectNamespace =
               Deps.Prelude.Text.concatSep "." config.rootNamespace
 
         let queryName = input.name.inSnakeCase
+
+        let statementsModuleNamespace = projectNamespace ++ ".Statements"
+
+        let defaultParams =
+              if    Deps.Prelude.List.null MemberModule.Output params
+              then  "Statement.${statementModuleName}"
+              else      "Statement.${statementModuleName}"
+                    ++  " "
+                    ++  Deps.Prelude.Text.concatMapSep
+                          " "
+                          MemberModule.Output
+                          ( \(member : MemberModule.Output) ->
+                              member.testDefaultLiteral
+                          )
+                          params
 
         let statementModuleContents =
               ''
@@ -113,6 +148,15 @@ let render =
 
               ''
 
+        let statementTestModuleContents =
+              Templates.StatementTestModule.run
+                { moduleNamespace = statementTestModuleNamespace
+                , statementName = statementModuleName
+                , statementsModuleNamespace
+                , typesModuleNamespace = projectNamespace ++ ".Types"
+                , defaultParams
+                }
+
         let statementsModuleReexportedModule =
               { header = Some statementModuleName
               , namespace = statementModuleNamespace
@@ -122,6 +166,11 @@ let render =
             , statementModuleNamespace
             , statementModulePath
             , statementModuleContents
+            , defaultParams
+            , statementTestModuleName
+            , statementTestModuleNamespace
+            , statementTestModulePath
+            , statementTestModuleContents
             , statementsModuleReexportedModule
             }
 

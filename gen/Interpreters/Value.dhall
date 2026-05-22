@@ -10,7 +10,12 @@ let Scalar = ./Scalar.dhall
 
 let Input = Project.Value
 
-let Output = { sig : Text, encoderExp : Text, decoderExp : Text }
+let Output =
+      { sig : Text
+      , encoderExp : Text
+      , decoderExp : Text
+      , testDefaultLiteral : Text
+      }
 
 let Result = Deps.Lude.Compiled.Type Output
 
@@ -49,6 +54,7 @@ let run =
                                 arraySettings.elementIsNullable
                             , elementExp = scalar.decoderExp
                             }
+                      , testDefaultLiteral = "mempty"
                       }
                 )
                 ( Deps.Lude.Compiled.ok
@@ -56,6 +62,7 @@ let run =
                     { sig = scalar.sig
                     , encoderExp = scalar.encoderExp
                     , decoderExp = scalar.decoderExp
+                    , testDefaultLiteral = scalar.testDefaultLiteral
                     }
                 )
           )

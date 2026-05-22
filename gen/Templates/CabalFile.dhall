@@ -7,6 +7,7 @@ let Params =
       , rootNamespace : Text
       , customTypeNames : List Text
       , statementModuleNames : List Text
+      , statementTestModuleNames : List Text
       , version : Text
       , dbName : Text
       }
@@ -72,5 +73,36 @@ in  Algebra.module
               time >=1.9 && <2,
               uuid >=1.2 && <2,
               vector >=0.12 && <0.14,
+
+          test-suite generated-integration-tests
+            type: exitcode-stdio-1.0
+            hs-source-dirs: test
+            main-is: Main.hs
+
+            default-language: Haskell2010
+
+            default-extensions:
+              BlockArguments, OverloadedStrings
+
+            other-modules:
+              ${params.rootNamespace}.StatementsSpec
+              ${Deps.Prelude.Text.concatMapSep
+                  ("\n" ++ "    ")
+                  Text
+                  ( \(name : Text) ->
+                      params.rootNamespace ++ ".Statements." ++ name
+                  )
+                  params.statementTestModuleNames}
+
+            build-depends:
+              base >=4.14 && <5,
+              bytestring >=0.10 && <0.13,
+              hasql ^>=1.10.3,
+              hasql-mapping ^>=0.1,
+              hspec >=2.11 && <3,
+              testcontainers-postgresql ^>=0.2.0.1,
+              text >=1.2 && <3,
+              uuid >=1.2 && <2,
+              ${params.packageName},
           ''
       )

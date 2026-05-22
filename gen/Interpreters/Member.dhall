@@ -15,6 +15,7 @@ let Output =
       , fieldDeclaration : Text
       , fieldEncoder : Text -> Text
       , fieldDecoder : Text
+      , testDefaultLiteral : Text
       }
 
 let run =
@@ -48,6 +49,11 @@ let run =
 
               let sig = if input.isNullable then "Maybe (${sig})" else sig
 
+              let testDefaultLiteral =
+                    if    input.isNullable
+                    then  "Nothing"
+                    else  value.testDefaultLiteral
+
               in  Deps.Lude.Compiled.ok
                     Output
                     { fieldName
@@ -72,6 +78,7 @@ let run =
                           , sig
                           , docs = Some "Maps to @${input.pgName}@."
                           }
+                    , testDefaultLiteral
                     }
           )
           ( Deps.Lude.Compiled.nest
