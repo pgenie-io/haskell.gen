@@ -88,6 +88,23 @@ let render =
                           )
                           params
 
+        let identityExpectedResultExp =
+              let identityValueNames =
+                    Deps.Prelude.List.map
+                      MemberModule.Output
+                      Text
+                      (\(member : MemberModule.Output) -> member.fieldName)
+                      params
+
+              in  if    Deps.Prelude.List.null Text identityValueNames
+                  then  "Data.Vector.singleton Statement.${statementModuleName}ResultRow"
+                  else      "case statementParams of "
+                        ++  "Statement.${statementModuleName} "
+                        ++  Deps.Prelude.Text.concatSep " " identityValueNames
+                        ++  " -> Data.Vector.singleton (Statement.${statementModuleName}ResultRow "
+                        ++  Deps.Prelude.Text.concatSep " " identityValueNames
+                        ++  ")"
+
         let statementModuleContents =
               ''
               module ${statementModuleNamespace} where
@@ -154,6 +171,8 @@ let render =
                 , statementsModuleNamespace
                 , typesModuleNamespace = projectNamespace ++ ".Types"
                 , paramsGenerator
+                , shouldTestIdentity = input.identity
+                , identityExpectedResultExp
                 }
 
         let statementsModuleReexportedModule =

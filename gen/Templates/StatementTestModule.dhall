@@ -8,12 +8,14 @@ let Params =
       , statementsModuleNamespace : Text
       , typesModuleNamespace : Text
       , paramsGenerator : Text
+      , shouldTestIdentity : Bool
+      , identityExpectedResultExp : Text
       }
 
 in  Algebra.module
       Params
       ( \(params : Params) ->
-          let propertyCase =
+          let executesCase =
                 ''
                 it "executes with arbitrary parameters" $ \pool ->
                   property $
@@ -25,6 +27,24 @@ in  Algebra.module
                           pure True
                       )
                 ''
+
+          let identityPropertyCase =
+                if    params.shouldTestIdentity
+                then  ''
+                      it "satisfies identity property" $ \pool ->
+                        property $
+                          forAll
+                            (${params.paramsGenerator})
+                            (\statementParams ->
+                              ioProperty $ do
+                                result <- Pool.use pool (Session.statement statementParams IsStatement.statement)
+                                pure $
+                                  case result of
+                                    Right rows -> rows == ${params.identityExpectedResultExp}
+                                    Left _ -> False
+                            )
+                      ''
+                else  ""
 
           in  ''
               module ${params.moduleNamespace} (spec) where
@@ -42,6 +62,7 @@ in  Algebra.module
 
               spec :: SpecWith Pool.Pool
               spec = do
-                ${Lude.Text.indentNonEmpty 2 propertyCase}
+                ${Lude.Text.indentNonEmpty 2 executesCase}
+                ${Lude.Text.indentNonEmpty 2 identityPropertyCase}
               ''
       )
