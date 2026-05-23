@@ -39,7 +39,7 @@ in  Algebra.module
               ${imports}
 
               spec :: SpecWith Pool.Pool
-              spec = describe "Statements" $ do
+              spec = parallel $ describe "Statements" $ do
                 ${Lude.Text.indentNonEmpty 2 subspecs}
               ''
       )

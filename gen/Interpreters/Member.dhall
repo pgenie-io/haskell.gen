@@ -15,7 +15,7 @@ let Output =
       , fieldDeclaration : Text
       , fieldEncoder : Text -> Text
       , fieldDecoder : Text
-      , testLiterals : { a : Text, b : Text }
+      , testArbitraryGen : Text
       }
 
 let run =
@@ -49,14 +49,10 @@ let run =
 
               let sig = if input.isNullable then "Maybe (${sig})" else sig
 
-              let testLiterals =
+              let testArbitraryGen =
                     if    input.isNullable
-                    then  { a = "Nothing"
-                          , b = "(Just ${value.testDefaultLiteralFull})"
-                          }
-                    else  { a = value.testDefaultLiteral
-                          , b = value.testDefaultLiteralFull
-                          }
+                    then  "(frequency [(1, pure Nothing), (3, Just <\$> ${value.testArbitraryGen})])"
+                    else  value.testArbitraryGen
 
               in  Deps.Lude.Compiled.ok
                     Output
@@ -82,7 +78,7 @@ let run =
                           , sig
                           , docs = Some "Maps to @${input.pgName}@."
                           }
-                    , testLiterals
+                    , testArbitraryGen
                     }
           )
           ( Deps.Lude.Compiled.nest

@@ -8,6 +8,7 @@ let Params =
       , typeName : Text
       , pgSchema : Text
       , pgTypeName : Text
+      , fieldNames : List Text
       , fieldDeclarations : List Text
       , fieldEncoderExps : List Text
       , fieldDecoderExps : List Text
@@ -26,6 +27,8 @@ let run =
         import qualified Hasql.Encoders as Encoders
         import qualified Hasql.Mapping.IsScalar as IsScalar
         import qualified PostgresqlTypes as Pt
+        import Test.QuickCheck (Arbitrary (..))
+        import Test.QuickCheck.Instances ()
         ${if    Deps.Prelude.List.null Text params.customTypeModules
           then  ""
           else  Deps.Prelude.Text.concatMapSep
@@ -47,6 +50,20 @@ let run =
                 )}
           }
           deriving stock (Show, Eq, Ord)
+
+        instance Arbitrary ${params.typeName} where
+          arbitrary =
+            ${Deps.Lude.Text.indent
+                12
+                ( if    Deps.Prelude.List.null Text params.fieldNames
+                  then  "pure ${params.typeName}"
+                  else      "${params.typeName} <\$> "
+                        ++  Deps.Prelude.Text.concatMapSep
+                              " <*> "
+                              Text
+                              (\(_ : Text) -> "arbitrary")
+                              params.fieldNames
+                )}
 
         instance IsScalar.IsScalar ${params.typeName} where
           encoder =

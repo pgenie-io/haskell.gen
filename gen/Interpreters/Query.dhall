@@ -16,8 +16,6 @@ let MemberModule = ./Member.dhall
 
 let Input = Deps.Project.Query
 
-let TestCase = { description : Text, params : Text }
-
 let Output =
       { statementModuleName : Text
       , statementModuleNamespace : Text
@@ -77,40 +75,18 @@ let render =
 
         let statementsModuleNamespace = projectNamespace ++ ".Statements"
 
-        let makeParams =
-              \(getLiteral : MemberModule.Output -> Text) ->
-                if    Deps.Prelude.List.null MemberModule.Output params
-                then  "Statement.${statementModuleName}"
-                else      "Statement.${statementModuleName}"
-                      ++  " "
-                      ++  Deps.Prelude.Text.concatMapSep
-                            " "
-                            MemberModule.Output
-                            getLiteral
-                            params
-
-        let defaultParamsA =
-              makeParams
-                (\(member : MemberModule.Output) -> member.testLiterals.a)
-
-        let defaultParamsB =
-              makeParams
-                (\(member : MemberModule.Output) -> member.testLiterals.b)
-
-        let defaultParamsCases
-            : List TestCase
-            = if    Text/equal defaultParamsA defaultParamsB
-              then  [ { description = "executes with default parameters"
-                      , params = defaultParamsA
-                      }
-                    ]
-              else  [ { description = "executes without optional values"
-                      , params = defaultParamsA
-                      }
-                    , { description = "executes with optional values"
-                      , params = defaultParamsB
-                      }
-                    ]
+        let paramsGenerator =
+              if    Deps.Prelude.List.null MemberModule.Output params
+              then  "pure Statement.${statementModuleName}"
+              else      "Statement.${statementModuleName}"
+                    ++  " <\$> "
+                    ++  Deps.Prelude.Text.concatMapSep
+                          " <*> "
+                          MemberModule.Output
+                          ( \(member : MemberModule.Output) ->
+                              member.testArbitraryGen
+                          )
+                          params
 
         let statementModuleContents =
               ''
@@ -177,7 +153,7 @@ let render =
                 , statementName = statementModuleName
                 , statementsModuleNamespace
                 , typesModuleNamespace = projectNamespace ++ ".Types"
-                , defaultParamsCases
+                , paramsGenerator
                 }
 
         let statementsModuleReexportedModule =

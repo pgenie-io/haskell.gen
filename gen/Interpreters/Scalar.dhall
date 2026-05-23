@@ -12,7 +12,7 @@ let Output =
       { sig : Text
       , encoderExp : Text
       , decoderExp : Text
-      , testDefaultLiteral : Text
+      , testArbitraryGen : Text
       }
 
 let run =
@@ -28,7 +28,7 @@ let run =
                       { sig = p.sig
                       , encoderExp = p.encoderExp
                       , decoderExp = p.decoderExp
-                      , testDefaultLiteral = p.testDefaultLiteral
+                      , testArbitraryGen = "arbitrary"
                       }
                   )
                   (Primitive.run config primitive)
@@ -39,8 +39,7 @@ let run =
                   { sig = "Types.${name.inPascalCase}"
                   , encoderExp = "IsScalar.encoder @${name.inCamelCase}"
                   , decoderExp = "IsScalar.decoder @${name.inCamelCase}"
-                  , testDefaultLiteral =
-                      "(error \"No test default for ${name.inPascalCase}\")"
+                  , testArbitraryGen = "arbitrary"
                   }
           }
           input

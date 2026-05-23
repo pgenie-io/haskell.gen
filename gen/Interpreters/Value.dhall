@@ -14,8 +14,7 @@ let Output =
       { sig : Text
       , encoderExp : Text
       , decoderExp : Text
-      , testDefaultLiteral : Text
-      , testDefaultLiteralFull : Text
+      , testArbitraryGen : Text
       }
 
 let Result = Deps.Lude.Compiled.Type Output
@@ -34,14 +33,16 @@ let run =
                 ( \(arraySettings : Project.ArraySettings) ->
                     let innerElement =
                           if    arraySettings.elementIsNullable
-                          then  "(Just ${scalar.testDefaultLiteral})"
-                          else  scalar.testDefaultLiteral
+                          then  "(frequency [(1, pure Nothing), (3, Just <\$> ${scalar.testArbitraryGen})])"
+                          else  scalar.testArbitraryGen
 
-                    let testDefaultLiteralFull =
+                    let testArbitraryGen =
                           Natural/fold
                             arraySettings.dimensionality
                             Text
-                            (\(inner : Text) -> "(pure ${inner})")
+                            ( \(inner : Text) ->
+                                "(Data.Vector.fromList <\$> listOf ${inner})"
+                            )
                             innerElement
 
                     in  Deps.Lude.Compiled.ok
@@ -67,8 +68,7 @@ let run =
                                     arraySettings.elementIsNullable
                                 , elementExp = scalar.decoderExp
                                 }
-                          , testDefaultLiteral = "mempty"
-                          , testDefaultLiteralFull
+                          , testArbitraryGen
                           }
                 )
                 ( Deps.Lude.Compiled.ok
@@ -76,8 +76,7 @@ let run =
                     { sig = scalar.sig
                     , encoderExp = scalar.encoderExp
                     , decoderExp = scalar.decoderExp
-                    , testDefaultLiteral = scalar.testDefaultLiteral
-                    , testDefaultLiteralFull = scalar.testDefaultLiteral
+                    , testArbitraryGen = scalar.testArbitraryGen
                     }
                 )
           )

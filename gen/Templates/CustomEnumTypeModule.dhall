@@ -22,6 +22,8 @@ let run =
         import qualified Hasql.Decoders as Decoders
         import qualified Hasql.Encoders as Encoders
         import qualified Hasql.Mapping.IsScalar as IsScalar
+        import Test.QuickCheck (Arbitrary (..), elements)
+        import Test.QuickCheck.Instances ()
 
         -- |
         -- Representation of the @${params.pgTypeName}@ user-declared PostgreSQL enumeration type.
@@ -41,6 +43,23 @@ let run =
                     params.variants
                 )}
           deriving stock (Show, Eq, Ord, Enum, Bounded)
+
+        instance Arbitrary ${params.typeName} where
+          arbitrary =
+            elements
+              [ ${Deps.Lude.Text.indent
+                    8
+                    ( Deps.Prelude.Text.concatMapSep
+                        ''
+                        ,
+                        ''
+                        Variant
+                        ( \(variant : Variant) ->
+                            "${variant.name}${params.typeName}"
+                        )
+                        params.variants
+                    )}
+              ]
 
         instance IsScalar.IsScalar ${params.typeName} where
           encoder =
