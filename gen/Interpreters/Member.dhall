@@ -15,7 +15,7 @@ let Output =
       , fieldDeclaration : Text
       , fieldEncoder : Text -> Text
       , fieldDecoder : Text
-      , testDefaultLiteral : Text
+      , testLiterals : { a : Text, b : Text }
       }
 
 let run =
@@ -49,10 +49,14 @@ let run =
 
               let sig = if input.isNullable then "Maybe (${sig})" else sig
 
-              let testDefaultLiteral =
+              let testLiterals =
                     if    input.isNullable
-                    then  "Nothing"
-                    else  value.testDefaultLiteral
+                    then  { a = "Nothing"
+                          , b = "(Just ${value.testDefaultLiteralFull})"
+                          }
+                    else  { a = value.testDefaultLiteral
+                          , b = value.testDefaultLiteralFull
+                          }
 
               in  Deps.Lude.Compiled.ok
                     Output
@@ -78,7 +82,7 @@ let run =
                           , sig
                           , docs = Some "Maps to @${input.pgName}@."
                           }
-                    , testDefaultLiteral
+                    , testLiterals
                     }
           )
           ( Deps.Lude.Compiled.nest

@@ -15,6 +15,7 @@ let Output =
       , encoderExp : Text
       , decoderExp : Text
       , testDefaultLiteral : Text
+      , testDefaultLiteralFull : Text
       }
 
 let Result = Deps.Lude.Compiled.Type Output
@@ -31,31 +32,44 @@ let run =
                 input.arraySettings
                 Result
                 ( \(arraySettings : Project.ArraySettings) ->
-                    Deps.Lude.Compiled.ok
-                      Output
-                      { sig =
-                          Templates.DimensionalityType.run
-                            { dimensionality = arraySettings.dimensionality
-                            , elementIsNullable =
-                                arraySettings.elementIsNullable
-                            , elementSig = scalar.sig
-                            }
-                      , encoderExp =
-                          Templates.DimensionalityEncoderExp.run
-                            { dimensionality = arraySettings.dimensionality
-                            , elementIsNullable =
-                                arraySettings.elementIsNullable
-                            , elementExp = scalar.encoderExp
-                            }
-                      , decoderExp =
-                          Templates.DimensionalityDecoderExp.run
-                            { dimensionality = arraySettings.dimensionality
-                            , elementIsNullable =
-                                arraySettings.elementIsNullable
-                            , elementExp = scalar.decoderExp
-                            }
-                      , testDefaultLiteral = "mempty"
-                      }
+                    let innerElement =
+                          if    arraySettings.elementIsNullable
+                          then  "(Just ${scalar.testDefaultLiteral})"
+                          else  scalar.testDefaultLiteral
+
+                    let testDefaultLiteralFull =
+                          Natural/fold
+                            arraySettings.dimensionality
+                            Text
+                            (\(inner : Text) -> "(pure ${inner})")
+                            innerElement
+
+                    in  Deps.Lude.Compiled.ok
+                          Output
+                          { sig =
+                              Templates.DimensionalityType.run
+                                { dimensionality = arraySettings.dimensionality
+                                , elementIsNullable =
+                                    arraySettings.elementIsNullable
+                                , elementSig = scalar.sig
+                                }
+                          , encoderExp =
+                              Templates.DimensionalityEncoderExp.run
+                                { dimensionality = arraySettings.dimensionality
+                                , elementIsNullable =
+                                    arraySettings.elementIsNullable
+                                , elementExp = scalar.encoderExp
+                                }
+                          , decoderExp =
+                              Templates.DimensionalityDecoderExp.run
+                                { dimensionality = arraySettings.dimensionality
+                                , elementIsNullable =
+                                    arraySettings.elementIsNullable
+                                , elementExp = scalar.decoderExp
+                                }
+                          , testDefaultLiteral = "mempty"
+                          , testDefaultLiteralFull
+                          }
                 )
                 ( Deps.Lude.Compiled.ok
                     Output
@@ -63,6 +77,7 @@ let run =
                     , encoderExp = scalar.encoderExp
                     , decoderExp = scalar.decoderExp
                     , testDefaultLiteral = scalar.testDefaultLiteral
+                    , testDefaultLiteralFull = scalar.testDefaultLiteral
                     }
                 )
           )

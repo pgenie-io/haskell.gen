@@ -9,7 +9,6 @@ in  \(config : Optional Config) ->
       let interpreterConfig =
             { rootNamespace =
               [ project.space.inPascalCase, project.name.inPascalCase ]
-            , customTypeDefaults = [] : List { typeName : Text, literal : Text }
             }
 
       in  ProjectInterpreter.run interpreterConfig project

@@ -1,9 +1,6 @@
 let Deps = ../../Deps/package.dhall
 
-let CustomTypeDefault = { typeName : Text, literal : Text }
-
-let Config =
-      { rootNamespace : List Text, customTypeDefaults : List CustomTypeDefault }
+let Config = { rootNamespace : List Text }
 
 let module =
       \(Input : Type) ->
