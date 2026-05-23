@@ -241,19 +241,15 @@ let combineOutputs =
               , content =
                   Templates.StatementsSpecModule.run
                     { moduleNamespace = statementsSpecModuleNamespace
+                    , statementsModuleNamespace = rootNamespace ++ ".Statements"
                     , statementSpecs =
                         Deps.Prelude.List.map
-                          { index : Natural, value : QueryGen.Output }
-                          { moduleNamespace : Text, alias : Text }
-                          ( \ ( indexedQuery
-                              : { index : Natural, value : QueryGen.Output }
-                              ) ->
-                              { moduleNamespace =
-                                  indexedQuery.value.statementTestModuleNamespace
-                              , alias = "S" ++ Natural/show indexedQuery.index
-                              }
+                          QueryGen.Output
+                          Text
+                          ( \(query : QueryGen.Output) ->
+                              query.statementModuleName
                           )
-                          (Deps.Prelude.List.indexed QueryGen.Output queries)
+                          queries
                     }
               }
 

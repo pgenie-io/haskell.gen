@@ -78,6 +78,7 @@ in  Algebra.module
             type: exitcode-stdio-1.0
             hs-source-dirs: test
             main-is: Main.hs
+            ghc-options: -threaded
 
             default-language: Haskell2010
 
@@ -98,6 +99,7 @@ in  Algebra.module
               base >=4.14 && <5,
               bytestring >=0.10 && <0.13,
               hasql ^>=1.10.3,
+              hasql-pool ^>=1.4,
               hasql-mapping ^>=0.1,
               hspec >=2.11 && <3,
               testcontainers-postgresql ^>=0.2.0.1,

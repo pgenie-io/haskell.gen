@@ -1,40 +1,45 @@
 let Algebra = ./Algebra/package.dhall
 
-let Deps = ../Deps/package.dhall
+let Prelude = ../Deps/Prelude.dhall
 
-let StatementSpec = { moduleNamespace : Text, alias : Text }
+let Lude = ../Deps/Lude.dhall
 
-let Params = { moduleNamespace : Text, statementSpecs : List StatementSpec }
+let Params =
+      { moduleNamespace : Text
+      , statementsModuleNamespace : Text
+      , statementSpecs : List Text
+      }
 
 in  Algebra.module
       Params
       ( \(params : Params) ->
           let imports =
-                Deps.Prelude.Text.concatMapSep
+                Prelude.Text.concatMapSep
                   "\n"
-                  StatementSpec
-                  ( \(statementSpec : StatementSpec) ->
-                      "import qualified ${statementSpec.moduleNamespace} as ${statementSpec.alias}"
+                  Text
+                  ( \(statementName : Text) ->
+                      "import qualified ${params.statementsModuleNamespace}.${statementName}Spec as ${statementName}Spec"
                   )
                   params.statementSpecs
 
-          let runSpecs =
-                Deps.Prelude.Text.concatMapSep
-                  "; "
-                  StatementSpec
-                  ( \(statementSpec : StatementSpec) ->
-                      "${statementSpec.alias}.spec connection"
+          let subspecs =
+                Prelude.Text.concatMapSep
+                  "\n"
+                  Text
+                  ( \(statementName : Text) ->
+                      "describe \"${statementName}\" ${statementName}Spec.spec"
                   )
                   params.statementSpecs
 
           in  ''
               module ${params.moduleNamespace} (spec) where
 
-              import qualified Hasql.Connection as Connection
-              import Test.Hspec (Spec, describe)
+              import qualified Hasql.Pool as Pool
+              import Test.Hspec
               ${imports}
 
-              spec :: Connection.Connection -> Spec
-              spec connection = describe "Generated statements" $ do { ${runSpecs} }
+              spec :: SpecWith Pool.Pool
+              spec = describe "Statements" $ do
+                ${Lude.Text.indentNonEmpty 2 subspecs}
               ''
       )
