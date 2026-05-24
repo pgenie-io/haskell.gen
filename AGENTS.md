@@ -219,3 +219,8 @@ Lude.Text.indentNonEmpty 8 fragment
 ### Indentation belongs at the splice site, not the construction site
 
 Any string that is meant to be spliced into another string must be constructed without indentation. The `Lude.Text.indentNonEmpty` utility must be applied where the string is spliced into its surrounding context. This eliminates coupling between the string builder and the indentation level of the context it lands in.
+
+
+## Generated code style rules
+
+- Follow the Ormolu formatting standard (https://github.com/tweag/ormolu) for Haskell code.
