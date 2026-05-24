@@ -19,14 +19,14 @@ in  Algebra.module
           ++  params.surroundingEncoder
           ++  " ("
           ++  ( if    params.nullable
-                then  "Encoders.nullable"
-                else  "Encoders.nonNullable"
+                then  "Hasql.Encoders.nullable"
+                else  "Hasql.Encoders.nonNullable"
               )
           ++  " ("
           ++  DimensionalityEncoderExp.run
                 { dimensionality = params.dimensionality
                 , elementIsNullable = params.elementIsNullable
-                , elementExp = "IsScalar.encoder"
+                , elementExp = "Hasql.Mapping.IsScalar.encoder"
                 }
           ++  "))"
       )

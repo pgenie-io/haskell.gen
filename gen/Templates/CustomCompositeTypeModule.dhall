@@ -21,12 +21,12 @@ let run =
         module ${params.moduleName} where
 
         import ${params.preludeModuleName}
-        import qualified Data.Aeson as Aeson
-        import qualified Data.Vector as Vector
-        import qualified Hasql.Decoders as Decoders
-        import qualified Hasql.Encoders as Encoders
-        import qualified Hasql.Mapping.IsScalar as IsScalar
-        import qualified PostgresqlTypes as Pt
+        import qualified Data.Aeson
+        import qualified Data.Vector
+        import qualified Hasql.Decoders
+        import qualified Hasql.Encoders
+        import qualified Hasql.Mapping.IsScalar
+        import qualified PostgresqlTypes
         import Test.QuickCheck (Arbitrary (..))
         import Test.QuickCheck.Instances ()
         ${if    Deps.Prelude.List.null Text params.customTypeModules
@@ -34,7 +34,7 @@ let run =
           else  Deps.Prelude.Text.concatMapSep
                   "\n"
                   Text
-                  (\(m : Text) -> "import qualified ${m} as Types")
+                  (\(m : Text) -> "import ${m}")
                   params.customTypeModules}
 
         -- |
@@ -65,9 +65,9 @@ let run =
                               params.fieldNames
                 )}
 
-        instance IsScalar.IsScalar ${params.typeName} where
+        instance Hasql.Mapping.IsScalar.IsScalar ${params.typeName} where
           encoder =
-            Encoders.composite
+            Hasql.Encoders.composite
               (Just "${params.pgSchema}")
               "${params.pgTypeName}"
               ( mconcat
@@ -83,7 +83,7 @@ let run =
               )
           
           decoder =
-            Decoders.composite
+            Hasql.Decoders.composite
               (Just "${params.pgSchema}")
               "${params.pgTypeName}"
               ( ${params.typeName}
@@ -94,7 +94,9 @@ let run =
 
                               <*> ''
                               Text
-                              (\(field : Text) -> "Decoders.field (${field})")
+                              ( \(field : Text) ->
+                                  "Hasql.Decoders.field (${field})"
+                              )
                               params.fieldDecoderExps
                           )}
               )

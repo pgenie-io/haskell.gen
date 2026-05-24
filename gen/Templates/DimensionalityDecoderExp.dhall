@@ -7,20 +7,20 @@ let run =
         then  params.elementExp
         else  let base =
                     if    params.elementIsNullable
-                    then  "Decoders.nullable ${params.elementExp}"
-                    else  "Decoders.nonNullable ${params.elementExp}"
+                    then  "Hasql.Decoders.nullable ${params.elementExp}"
+                    else  "Hasql.Decoders.nonNullable ${params.elementExp}"
 
-              let base = "Decoders.element (${base})"
+              let base = "Hasql.Decoders.element (${base})"
 
               let arrayExp =
                     Natural/fold
                       params.dimensionality
                       Text
                       ( \(inner : Text) ->
-                          "Decoders.dimension Vector.replicateM (${inner})"
+                          "Hasql.Decoders.dimension Data.Vector.replicateM (${inner})"
                       )
                       base
 
-              in  "Decoders.array (${arrayExp})"
+              in  "Hasql.Decoders.array (${arrayExp})"
 
 in  { Params, run }

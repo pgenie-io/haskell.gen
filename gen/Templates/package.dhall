@@ -1,6 +1,7 @@
 { CabalFile = ./CabalFile.dhall
 , ModulePath = ./ModulePath.dhall
 , ParamsTypeDecl = ./ParamsTypeDecl.dhall
+, StatementModule = ./StatementModule.dhall
 , TestMainModule = ./TestMainModule.dhall
 , StatementsSpecModule = ./StatementsSpecModule.dhall
 , StatementTestModule = ./StatementTestModule.dhall

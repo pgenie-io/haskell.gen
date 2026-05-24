@@ -18,7 +18,7 @@ in  Algebra.module
                   "\n"
                   Text
                   ( \(statementName : Text) ->
-                      "import qualified ${params.statementsModuleNamespace}.${statementName}Spec as ${statementName}Spec"
+                      "import qualified ${params.statementsModuleNamespace}.${statementName}Spec"
                   )
                   params.statementSpecs
 
@@ -27,18 +27,18 @@ in  Algebra.module
                   "\n"
                   Text
                   ( \(statementName : Text) ->
-                      "describe \"${statementName}\" ${statementName}Spec.spec"
+                      "describe \"${statementName}\" ${params.statementsModuleNamespace}.${statementName}Spec.spec"
                   )
                   params.statementSpecs
 
           in  ''
               module ${params.moduleNamespace} (spec) where
 
-              import qualified Hasql.Pool as Pool
+              import qualified Hasql.Pool
               import Test.Hspec
               ${imports}
 
-              spec :: SpecWith Pool.Pool
+              spec :: SpecWith Hasql.Pool.Pool
               spec = parallel $ describe "Statements" $ do
                 ${Lude.Text.indentNonEmpty 2 subspecs}
               ''

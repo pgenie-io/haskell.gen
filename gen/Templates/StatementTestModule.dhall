@@ -5,15 +5,11 @@ let Prelude = ../Deps/Prelude.dhall
 let Lude = ../Deps/Lude.dhall
 
 let Params =
-      { moduleNamespace : Text
-      , statementName : Text
+      { statementModuleName : Text
+      , moduleNamespace : Text
       , statementsModuleNamespace : Text
-      , typesModuleNamespace : Text
-      , paramsGenerator : Text
       , shouldTestIdentity : Bool
-      , identityExpectedResultExp : Text
-      , identityPreconditionExp : Text
-      , identityRectangularHelpers : Text
+      , identityValueNames : List Text
       }
 
 in  Algebra.module
@@ -24,34 +20,38 @@ in  Algebra.module
                 then  None Text
                 else  Some
                         ''
-                        it "executes with arbitrary parameters" $ \pool ->
-                          property $
-                            forAll
-                              (${params.paramsGenerator})
-                              (\statementParams ->
-                                ioProperty $ do
-                                  _ <- Pool.use pool (Session.statement statementParams IsStatement.statement)
-                                  pure True
-                              )''
+                        it "executes with arbitrary parameters" \pool ->
+                          property \statementParams ->
+                            ioProperty do
+                              result <- Hasql.Pool.use pool (Hasql.Session.statement statementParams Hasql.Mapping.IsStatement.statement)
+                              pure (isRight result)''
 
           let identityTestCase =
                 if    params.shouldTestIdentity
-                then  Some
-                        ''
-                        it "satisfies identity property" $ \pool ->
-                          property $
-                            forAll
-                              (${params.paramsGenerator})
-                              (\statementParams ->
-                                (${params.identityPreconditionExp}) ==>
-                                  ioProperty (do
-                                    result <- Pool.use pool (Session.statement statementParams IsStatement.statement)
-                                    pure $
-                                      case result of
-                                        Right rows -> rows == ${params.identityExpectedResultExp}
-                                        Left _ -> False
-                                  )
-                              )''
+                then  let expectedResultExp =
+                            if    Prelude.List.null
+                                    Text
+                                    params.identityValueNames
+                            then  "Data.Vector.singleton ${params.statementsModuleNamespace}.${params.statementModuleName}ResultRow"
+                            else  let varNames =
+                                        Prelude.Text.concatSep
+                                          " "
+                                          params.identityValueNames
+
+                                  in  ''
+                                      case statementParams of
+                                        ${params.statementsModuleNamespace}.${params.statementModuleName} ${varNames} ->
+                                          Data.Vector.singleton (${params.statementsModuleNamespace}.${params.statementModuleName}ResultRow ${varNames})''
+
+                      in  Some
+                            ''
+                            it "satisfies identity property" \pool ->
+                              property \statementParams ->
+                                ioProperty do
+                                  result <- Hasql.Pool.use pool (Hasql.Session.statement statementParams Hasql.Mapping.IsStatement.statement)
+                                  let expectedResult =
+                                        ${Lude.Text.indent 12 expectedResultExp}
+                                  pure (result === Right expectedResult)''
                 else  None Text
 
           let cases =
@@ -65,23 +65,20 @@ in  Algebra.module
           in  ''
               module ${params.moduleNamespace} (spec) where
 
-              import qualified Data.Either as Either
+              import Data.Either (isRight)
               import qualified Data.Text
               import qualified Data.Vector
-              import qualified Hasql.Pool as Pool
-              import qualified Hasql.Mapping.IsStatement as IsStatement
-              import qualified Hasql.Session as Session
-              import qualified ${params.statementsModuleNamespace} as Statement
-              import qualified ${params.typesModuleNamespace} as Types
+              import qualified Hasql.Pool
+              import qualified Hasql.Mapping.IsStatement
+              import qualified Hasql.Session
+              import qualified ${params.statementsModuleNamespace}
 
               import Test.Hspec
               import Test.QuickCheck
               import Test.QuickCheck.Instances ()
 
-              spec :: SpecWith Pool.Pool
+              spec :: SpecWith Hasql.Pool.Pool
               spec = do
                 ${Lude.Text.indentNonEmpty 2 cases}
-
-              ${params.identityRectangularHelpers}
               ''
       )

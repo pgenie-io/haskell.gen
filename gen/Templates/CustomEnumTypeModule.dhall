@@ -19,9 +19,9 @@ let run =
         module ${params.moduleName} where
 
         import ${params.preludeModuleName}
-        import qualified Hasql.Decoders as Decoders
-        import qualified Hasql.Encoders as Encoders
-        import qualified Hasql.Mapping.IsScalar as IsScalar
+        import qualified Hasql.Decoders
+        import qualified Hasql.Encoders
+        import qualified Hasql.Mapping.IsScalar
         import Test.QuickCheck (Arbitrary (..), elements)
         import Test.QuickCheck.Instances ()
 
@@ -61,9 +61,9 @@ let run =
                     )}
               ]
 
-        instance IsScalar.IsScalar ${params.typeName} where
+        instance Hasql.Mapping.IsScalar.IsScalar ${params.typeName} where
           encoder =
-            Encoders.enum
+            Hasql.Encoders.enum
               (Just "${params.pgSchema}")
               "${params.pgTypeName}"
               ( \case
@@ -80,7 +80,7 @@ let run =
               )
           
           decoder =
-            Decoders.enum
+            Hasql.Decoders.enum
               (Just "${params.pgSchema}")
               "${params.pgTypeName}"
               ( \case

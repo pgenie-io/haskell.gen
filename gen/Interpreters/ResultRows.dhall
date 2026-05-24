@@ -4,6 +4,8 @@ let Algebra = ./Algebra/package.dhall
 
 let Templates = ../Templates/package.dhall
 
+let Lude = Deps.Lude
+
 let Member = ./Member.dhall
 
 let Project = Deps.Project
@@ -49,39 +51,39 @@ let run =
                               ++  "  deriving stock (Show, Eq)"
 
                         let rowDecoderExp =
-                              ''
-                              do
-                                ${Deps.Lude.Text.indent
-                                    2
-                                    ( Deps.Prelude.Text.concatMap
-                                        Member.Output
-                                        ( \(column : Member.Output) ->
-                                            ''
-                                            ${column.fieldName} <- Decoders.column (${column.fieldDecoder})
-                                            ''
-                                        )
-                                        columns
-                                    )}pure ${rowTypeName} {..}''
+                              let columnBindings =
+                                    Deps.Prelude.Text.concatMapSep
+                                      "\n"
+                                      Member.Output
+                                      ( \(column : Member.Output) ->
+                                          "${column.fieldName} <- Hasql.Decoders.column (${column.fieldDecoder})"
+                                      )
+                                      columns
+
+                              in  ''
+                                  do
+                                    ${Lude.Text.indentNonEmpty 2 columnBindings}
+                                    pure ${rowTypeName} {..}''
 
                         let resolvedCardinality =
                               merge
                                 { Optional =
                                   { decoderExp =
-                                      "Decoders.rowMaybe ${rowDecoderExp}"
+                                      "Hasql.Decoders.rowMaybe ${rowDecoderExp}"
                                   , resultTypeDecl =
                                       "type ${typeNameBase}Result = Maybe ${rowTypeName}"
                                   }
                                 , Single =
                                   { decoderExp =
-                                      "Decoders.singleRow ${rowDecoderExp}"
+                                      "Hasql.Decoders.singleRow ${rowDecoderExp}"
                                   , resultTypeDecl =
                                       "type ${typeNameBase}Result = ${rowTypeName}"
                                   }
                                 , Multiple =
                                   { decoderExp =
-                                      "Decoders.rowVector ${rowDecoderExp}"
+                                      "Hasql.Decoders.rowVector ${rowDecoderExp}"
                                   , resultTypeDecl =
-                                      "type ${typeNameBase}Result = Vector.Vector ${rowTypeName}"
+                                      "type ${typeNameBase}Result = Data.Vector.Vector ${rowTypeName}"
                                   }
                                 }
                                 input.cardinality

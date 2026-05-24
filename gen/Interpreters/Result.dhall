@@ -27,7 +27,7 @@ let run =
                       ''
                       type ${typeNameBase}Result = Int
                       ''
-                  , decoderExp = "fromIntegral <\$> Decoders.rowsAffected"
+                  , decoderExp = "fromIntegral <\$> Hasql.Decoders.rowsAffected"
                   }
               )
           )

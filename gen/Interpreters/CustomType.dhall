@@ -109,7 +109,7 @@ let run =
                                             Text
                                             ( \(member : MemberGen.Output) ->
                                                 member.fieldEncoder
-                                                  "Encoders.field"
+                                                  "Hasql.Encoders.field"
                                             )
                                             members
                                       , fieldDecoderExps =

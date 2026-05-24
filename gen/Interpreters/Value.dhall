@@ -2,6 +2,8 @@ let Deps = ../Deps/package.dhall
 
 let Algebra = ./Algebra/package.dhall
 
+let Lude = Deps.Lude
+
 let Project = Deps.Project
 
 let Templates = ../Templates/package.dhall
@@ -41,39 +43,51 @@ let run =
                                 Natural/fold
                                   arraySettings.dimensionality
                                   { nextIndex : Natural
-                                  , bindings : Text
+                                  , bindings : List Text
                                   , exp : Text
                                   }
                                   ( \ ( acc
                                       : { nextIndex : Natural
-                                        , bindings : Text
+                                        , bindings : List Text
                                         , exp : Text
                                         }
                                       ) ->
                                       let dimText = Natural/show acc.nextIndex
 
-                                      let binding =
+                                      let boundExp =
                                             if    Natural/isZero
                                                     ( Natural/subtract
                                                         acc.nextIndex
                                                         arraySettings.dimensionality
                                                     )
-                                            then  "len${dimText} <- chooseInt (0, bound)"
-                                            else  "len${dimText} <- chooseInt (1, positiveBound)"
+                                            then  "(0, max 0 (min 4 size))"
+                                            else  "(1, max 1 (max 0 (min 4 size)))"
+
+                                      let binding =
+                                            "len${dimText} <- chooseInt ${boundExp}"
 
                                       in  { nextIndex = acc.nextIndex + 1
                                           , bindings =
-                                              acc.bindings ++ binding ++ "; "
+                                              acc.bindings # [ binding ]
                                           , exp =
                                               "(Data.Vector.fromList <\$> vectorOf len${dimText} ${acc.exp})"
                                           }
                                   )
                                   { nextIndex = 1
-                                  , bindings = ""
+                                  , bindings = [] : List Text
                                   , exp = innerElement
                                   }
 
-                          in  "(sized (\\size -> do { let { bound = max 0 (min 4 size); positiveBound = max 1 bound }; ${generated.bindings}${generated.exp} }))"
+                          let statements =
+                                Deps.Prelude.Text.concatSep
+                                  "\n"
+                                  generated.bindings
+
+                          in  ''
+                              ( sized \size -> do
+                                  ${Lude.Text.indentNonEmpty 4 statements}
+                                  ${Lude.Text.indentNonEmpty 4 generated.exp}
+                              )''
 
                     let testArbitraryGen = rectangularArbitrary
 

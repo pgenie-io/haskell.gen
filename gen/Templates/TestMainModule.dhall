@@ -19,61 +19,62 @@ in  Algebra.module
           let runMigrationsBody =
                 if    Prelude.List.null Migration params.migrations
                 then  "pure ()"
-                else  Prelude.Text.concatMapSep
-                        ''
-
-                        >>
-                        ''
-                        Migration
-                        ( \(migration : Migration) ->
-                            ''
-                            ( Session.script
-                              ${Lude.Text.indentNonEmpty
-                                  4
-                                  (StringLiteral.run migration.sql)}
-                            )''
-                        )
-                        params.migrations
+                else  ''
+                      do
+                        ${Lude.Text.indentNonEmpty
+                            2
+                            ( Prelude.Text.concatMapSep
+                                "\n"
+                                Migration
+                                ( \(migration : Migration) ->
+                                    ''
+                                    Hasql.Session.script
+                                      ${Lude.Text.indentNonEmpty
+                                          4
+                                          (StringLiteral.run migration.sql)}''
+                                )
+                                params.migrations
+                            )}''
 
           in  ''
               module Main where
 
-              import qualified Hasql.Connection.Settings as Settings
-              import qualified Hasql.Pool as Pool
-              import qualified Hasql.Pool.Config as PoolConfig
-              import qualified Hasql.Session as Session
+              import qualified Hasql.Connection.Settings
+              import qualified Hasql.Pool
+              import qualified Hasql.Pool.Config
+              import qualified Hasql.Session
               import Test.Hspec
-              import qualified TestcontainersPostgresql as Tcp
-              import qualified ${params.statementsSpecModuleNamespace} as StatementsSpec
+              import qualified TestcontainersPostgresql
+              import qualified ${params.statementsSpecModuleNamespace}
 
               main :: IO ()
               main = hspec do
                 aroundAllWith
                   ( \action () -> do
-                    Tcp.run
-                      Tcp.Config
-                        { Tcp.tagName = "${postgresTag}"
-                        , Tcp.auth = Tcp.TrustAuth
-                        , Tcp.forwardLogs = False
+                    TestcontainersPostgresql.run
+                      TestcontainersPostgresql.Config
+                        { TestcontainersPostgresql.tagName = "${postgresTag}"
+                        , TestcontainersPostgresql.auth = TestcontainersPostgresql.TrustAuth
+                        , TestcontainersPostgresql.forwardLogs = False
                         }
                       ( \(host, port) -> do
                           let connectionSettings =
-                                Settings.hostAndPort host port
-                                  <> Settings.user "postgres"
-                                  <> Settings.dbname "postgres"
+                                Hasql.Connection.Settings.hostAndPort host port
+                                  <> Hasql.Connection.Settings.user "postgres"
+                                  <> Hasql.Connection.Settings.dbname "postgres"
 
                           pool <-
-                            Pool.acquire
-                              ( PoolConfig.settings
-                                  [ PoolConfig.size 10
-                                  , PoolConfig.staticConnectionSettings connectionSettings
+                            Hasql.Pool.acquire
+                              ( Hasql.Pool.Config.settings
+                                  [ Hasql.Pool.Config.size 10
+                                  , Hasql.Pool.Config.staticConnectionSettings connectionSettings
                                   ]
                               )
 
                           migrationResult <-
-                            Pool.use
+                            Hasql.Pool.use
                               pool
-                              ( ${Lude.Text.indentNonEmpty 14 runMigrationsBody}
+                              ( ${Lude.Text.indentNonEmpty 18 runMigrationsBody}
                               )
 
                           case migrationResult of
@@ -85,9 +86,9 @@ in  Algebra.module
 
                           action pool
 
-                          Pool.release pool
+                          Hasql.Pool.release pool
                       )
                   )
-                  StatementsSpec.spec                
+                  ${params.statementsSpecModuleNamespace}.spec
               ''
       )

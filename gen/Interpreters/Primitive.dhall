@@ -15,8 +15,7 @@ let Output =
 
 let defaultTestArbitraryGen = "arbitrary"
 
-let safeTextTestArbitraryGen =
-      "(Data.Text.pack <\$> listOf (suchThat arbitrary (\\c -> c /= '\\NUL' && (c < '\\xD800' || c > '\\xDFFF'))))"
+let fromWrapped = \(converter : Text) -> "(${converter} <\$> arbitrary)"
 
 let unsupportedType =
       \(type : Text) ->
@@ -28,9 +27,21 @@ let std =
         Deps.Lude.Compiled.ok
           Output
           { sig
-          , encoderExp = "Encoders.${codecName}"
-          , decoderExp = "Decoders.${codecName}"
+          , encoderExp = "Hasql.Encoders.${codecName}"
+          , decoderExp = "Hasql.Decoders.${codecName}"
           , testArbitraryGen = defaultTestArbitraryGen
+          }
+
+let fromWrappedGen =
+      \(sig : Text) ->
+      \(codecName : Text) ->
+      \(converter : Text) ->
+        Deps.Lude.Compiled.ok
+          Output
+          { sig
+          , encoderExp = "Hasql.Encoders.${codecName}"
+          , decoderExp = "Hasql.Decoders.${codecName}"
+          , testArbitraryGen = fromWrapped converter
           }
 
 let isScalar =
@@ -38,8 +49,8 @@ let isScalar =
         Deps.Lude.Compiled.ok
           Output
           { sig
-          , encoderExp = "IsScalar.encoder"
-          , decoderExp = "IsScalar.decoder"
+          , encoderExp = "Hasql.Mapping.IsScalar.encoder"
+          , decoderExp = "Hasql.Mapping.IsScalar.decoder"
           , testArbitraryGen = defaultTestArbitraryGen
           }
 
@@ -47,68 +58,83 @@ let run =
       \(config : Algebra.Config) ->
       \(input : Input) ->
         merge
-          { Bit = isScalar "Pt.Bit 1"
+          { Bit = isScalar "PostgresqlTypes.Bit 1"
           , Bool = std "Bool" "bool"
-          , Box = isScalar "Pt.Box"
-          , Bpchar = isScalar "Pt.Bpchar 0"
-          , Bytea = std "ByteString" "bytea"
-          , Char = isScalar "Pt.Char"
-          , Circle = isScalar "Pt.Circle"
-          , Cidr = isScalar "Pt.Cidr"
+          , Box = isScalar "PostgresqlTypes.Box"
+          , Bpchar = isScalar "PostgresqlTypes.Bpchar 0"
+          , Bytea =
+              fromWrappedGen
+                "ByteString"
+                "bytea"
+                "PostgresqlTypes.Bytea.toByteString"
+          , Char = isScalar "PostgresqlTypes.Char"
+          , Circle = isScalar "PostgresqlTypes.Circle"
+          , Cidr = isScalar "PostgresqlTypes.Cidr"
           , Citext = unsupportedType "citext"
-          , Date = isScalar "Pt.Date"
-          , Datemultirange = isScalar "Pt.Multirange Pt.Date"
-          , Daterange = isScalar "Pt.Range Pt.Date"
-          , Float4 = std "Float" "float4"
-          , Float8 = std "Double" "float8"
-          , Hstore = isScalar "Pt.Hstore"
-          , Inet = isScalar "Pt.Inet"
-          , Int2 = std "Int16" "int2"
-          , Int4 = std "Int32" "int4"
-          , Int4multirange = isScalar "Pt.Multirange Pt.Int4"
-          , Int4range = isScalar "Pt.Range Pt.Int4"
-          , Int8 = std "Int64" "int8"
-          , Int8multirange = isScalar "Pt.Multirange Pt.Int8"
-          , Int8range = isScalar "Pt.Range Pt.Int8"
-          , Interval = isScalar "Pt.Interval"
-          , Json = isScalar "Pt.Json"
-          , Jsonb = isScalar "Pt.Jsonb"
-          , Line = isScalar "Pt.Line"
-          , Lseg = isScalar "Pt.Lseg"
-          , Macaddr = isScalar "Pt.Macaddr"
-          , Macaddr8 = isScalar "Pt.Macaddr8"
-          , Money = isScalar "Pt.Money"
+          , Date = isScalar "PostgresqlTypes.Date"
+          , Datemultirange =
+              isScalar "PostgresqlTypes.Multirange PostgresqlTypes.Date"
+          , Daterange = isScalar "PostgresqlTypes.Range PostgresqlTypes.Date"
+          , Float4 =
+              fromWrappedGen "Float" "float4" "PostgresqlTypes.Float4.toFloat"
+          , Float8 =
+              fromWrappedGen "Double" "float8" "PostgresqlTypes.Float8.toDouble"
+          , Hstore = isScalar "PostgresqlTypes.Hstore"
+          , Inet = isScalar "PostgresqlTypes.Inet"
+          , Int2 = fromWrappedGen "Int16" "int2" "PostgresqlTypes.Int2.toInt16"
+          , Int4 = fromWrappedGen "Int32" "int4" "PostgresqlTypes.Int4.toInt32"
+          , Int4multirange =
+              isScalar "PostgresqlTypes.Multirange PostgresqlTypes.Int4"
+          , Int4range = isScalar "PostgresqlTypes.Range PostgresqlTypes.Int4"
+          , Int8 = fromWrappedGen "Int64" "int8" "PostgresqlTypes.Int8.toInt64"
+          , Int8multirange =
+              isScalar "PostgresqlTypes.Multirange PostgresqlTypes.Int8"
+          , Int8range = isScalar "PostgresqlTypes.Range PostgresqlTypes.Int8"
+          , Interval = isScalar "PostgresqlTypes.Interval"
+          , Json = isScalar "PostgresqlTypes.Json"
+          , Jsonb = isScalar "PostgresqlTypes.Jsonb"
+          , Line = isScalar "PostgresqlTypes.Line"
+          , Lseg = isScalar "PostgresqlTypes.Lseg"
+          , Macaddr = isScalar "PostgresqlTypes.Macaddr"
+          , Macaddr8 = isScalar "PostgresqlTypes.Macaddr8"
+          , Money = isScalar "PostgresqlTypes.Money"
           , Name = unsupportedType "name"
-          , Numeric = isScalar "Pt.Numeric 0 0"
-          , Nummultirange = isScalar "Pt.Multirange (Pt.Numeric 0 0)"
-          , Numrange = isScalar "Pt.Range (Pt.Numeric 0 0)"
-          , Oid = isScalar "Pt.Oid"
-          , Path = isScalar "Pt.Path"
-          , PgLsn = unsupportedType "pg_lsn"
-          , PgSnapshot = unsupportedType "pg_snapshot"
-          , Point = isScalar "Pt.Point"
-          , Polygon = isScalar "Pt.Polygon"
-          , Text =
+          , Numeric =
               Deps.Lude.Compiled.ok
                 Output
-                { sig = "Text"
-                , encoderExp = "Encoders.text"
-                , decoderExp = "Decoders.text"
-                , testArbitraryGen = safeTextTestArbitraryGen
+                { sig = "Scientific"
+                , encoderExp = "Hasql.Mapping.IsScalar.encoder"
+                , decoderExp = "Hasql.Mapping.IsScalar.decoder"
+                , testArbitraryGen = defaultTestArbitraryGen
                 }
-          , Time = isScalar "Pt.Time"
-          , Timestamp = isScalar "Pt.Timestamp"
-          , Timestamptz = isScalar "Pt.Timestamptz"
-          , Timetz = isScalar "Pt.Timetz"
-          , Tsmultirange = isScalar "Pt.Multirange Pt.Timestamp"
+          , Nummultirange =
+              isScalar
+                "PostgresqlTypes.Multirange (PostgresqlTypes.Numeric 0 0)"
+          , Numrange =
+              isScalar "PostgresqlTypes.Range (PostgresqlTypes.Numeric 0 0)"
+          , Oid = isScalar "PostgresqlTypes.Oid"
+          , Path = isScalar "PostgresqlTypes.Path"
+          , PgLsn = unsupportedType "pg_lsn"
+          , PgSnapshot = unsupportedType "pg_snapshot"
+          , Point = isScalar "PostgresqlTypes.Point"
+          , Polygon = isScalar "PostgresqlTypes.Polygon"
+          , Text = fromWrappedGen "Text" "text" "PostgresqlTypes.Text.toText"
+          , Time = isScalar "PostgresqlTypes.Time"
+          , Timestamp = isScalar "PostgresqlTypes.Timestamp"
+          , Timestamptz = isScalar "PostgresqlTypes.Timestamptz"
+          , Timetz = isScalar "PostgresqlTypes.Timetz"
+          , Tsmultirange =
+              isScalar "PostgresqlTypes.Multirange PostgresqlTypes.Timestamp"
           , Tsquery = unsupportedType "tsquery"
-          , Tsrange = isScalar "Pt.Range Pt.Timestamp"
-          , Tstzmultirange = isScalar "Pt.Multirange Pt.Timestamptz"
-          , Tstzrange = isScalar "Pt.Range Pt.Timestamptz"
-          , Tsvector = isScalar "Pt.Tsvector"
-          , Uuid = std "UUID" "uuid"
-          , Varbit = isScalar "Pt.Varbit 0"
-          , Varchar = isScalar "Pt.Varchar 0"
+          , Tsrange = isScalar "PostgresqlTypes.Range PostgresqlTypes.Timestamp"
+          , Tstzmultirange =
+              isScalar "PostgresqlTypes.Multirange PostgresqlTypes.Timestamptz"
+          , Tstzrange =
+              isScalar "PostgresqlTypes.Range PostgresqlTypes.Timestamptz"
+          , Tsvector = isScalar "PostgresqlTypes.Tsvector"
+          , Uuid = fromWrappedGen "UUID" "uuid" "PostgresqlTypes.Uuid.toUUID"
+          , Varbit = isScalar "PostgresqlTypes.Varbit 0"
+          , Varchar = isScalar "PostgresqlTypes.Varchar 0"
           , Xml = unsupportedType "xml"
           , Box2D = unsupportedType "box2d"
           , Box3D = unsupportedType "box3d"

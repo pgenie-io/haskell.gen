@@ -36,9 +36,11 @@ let run =
               \(name : Project.Name) ->
                 Deps.Lude.Compiled.ok
                   Output
-                  { sig = "Types.${name.inPascalCase}"
-                  , encoderExp = "IsScalar.encoder @${name.inCamelCase}"
-                  , decoderExp = "IsScalar.decoder @${name.inCamelCase}"
+                  { sig = name.inPascalCase
+                  , encoderExp =
+                      "Hasql.Mapping.IsScalar.encoder @${name.inCamelCase}"
+                  , decoderExp =
+                      "Hasql.Mapping.IsScalar.decoder @${name.inCamelCase}"
                   , testArbitraryGen = "arbitrary"
                   }
           }
