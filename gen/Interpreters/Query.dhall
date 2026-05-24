@@ -88,22 +88,110 @@ let render =
                           )
                           params
 
+        let identityValueNames =
+              Deps.Prelude.List.map
+                MemberModule.Output
+                Text
+                (\(member : MemberModule.Output) -> member.fieldName)
+                params
+
         let identityExpectedResultExp =
-              let identityValueNames =
-                    Deps.Prelude.List.map
+              if    Deps.Prelude.List.null Text identityValueNames
+              then  "Data.Vector.singleton Statement.${statementModuleName}ResultRow"
+              else      "case statementParams of "
+                    ++  "Statement.${statementModuleName} "
+                    ++  Deps.Prelude.Text.concatSep " " identityValueNames
+                    ++  " -> Data.Vector.singleton (Statement.${statementModuleName}ResultRow "
+                    ++  Deps.Prelude.Text.concatSep " " identityValueNames
+                    ++  ")"
+
+        let identityPreconditionExp =
+              let memberChecks =
+                    Deps.Prelude.List.concatMap
                       MemberModule.Output
                       Text
-                      (\(member : MemberModule.Output) -> member.fieldName)
+                      ( \(member : MemberModule.Output) ->
+                          if    Natural/isZero
+                                  ( Natural/subtract
+                                      1
+                                      member.identityRectangularDim
+                                  )
+                          then  [] : List Text
+                          else  let dimText =
+                                      Natural/show member.identityRectangularDim
+
+                                let check =
+                                      if    member.identityIsNullable
+                                      then  "maybe True (\\x -> isRectangular${dimText} x) ${member.fieldName}"
+                                      else  "isRectangular${dimText} ${member.fieldName}"
+
+                                in  [ check ]
+                      )
                       params
 
-              in  if    Deps.Prelude.List.null Text identityValueNames
-                  then  "Data.Vector.singleton Statement.${statementModuleName}ResultRow"
+              in  if    Deps.Prelude.List.null Text memberChecks
+                  then  "True"
                   else      "case statementParams of "
                         ++  "Statement.${statementModuleName} "
                         ++  Deps.Prelude.Text.concatSep " " identityValueNames
-                        ++  " -> Data.Vector.singleton (Statement.${statementModuleName}ResultRow "
-                        ++  Deps.Prelude.Text.concatSep " " identityValueNames
-                        ++  ")"
+                        ++  " -> "
+                        ++  Deps.Prelude.Text.concatSep " && " memberChecks
+
+        let identityRectangularHelperMaxDim =
+              Deps.Prelude.List.fold
+                MemberModule.Output
+                params
+                Natural
+                ( \(member : MemberModule.Output) ->
+                  \(currentMax : Natural) ->
+                    if    Natural/isZero
+                            ( Natural/subtract
+                                currentMax
+                                member.identityRectangularDim
+                            )
+                    then  currentMax
+                    else  member.identityRectangularDim
+                )
+                0
+
+        let identityRectangularHelpers =
+              let generated =
+                    Natural/fold
+                      (identityRectangularHelperMaxDim + 1)
+                      { index : Natural, text : Text }
+                      ( \(acc : { index : Natural, text : Text }) ->
+                          let i = acc.index
+
+                          let fnText =
+                                if        Natural/isZero (Natural/subtract 2 i)
+                                      &&  ( if    Natural/isZero
+                                                    (Natural/subtract 1 i)
+                                            then  False
+                                            else  True
+                                          )
+                                then  ''
+                                      isRectangular2 xs =
+                                        let width = maybe 0 Data.Vector.length (xs Data.Vector.!? 0)
+                                        in Data.Vector.all (\row -> Data.Vector.length row == width) xs
+                                      ''
+                                else  if Natural/isZero (Natural/subtract 1 i)
+                                then  ""
+                                else  let dimText = Natural/show i
+
+                                      let prevDimText =
+                                            Natural/show (Natural/subtract 1 i)
+
+                                      in  ''
+                                          isRectangular${dimText} xs =
+                                            let width = maybe 0 Data.Vector.length (xs Data.Vector.!? 0)
+                                            in Data.Vector.all (\row -> Data.Vector.length row == width && isRectangular${prevDimText} row) xs
+                                          ''
+
+                          in  { index = i + 1, text = acc.text ++ fnText }
+                      )
+                      { index = 0, text = "" }
+
+              in  generated.text
 
         let statementModuleContents =
               ''
@@ -173,6 +261,8 @@ let render =
                 , paramsGenerator
                 , shouldTestIdentity = input.identity
                 , identityExpectedResultExp
+                , identityPreconditionExp
+                , identityRectangularHelpers
                 }
 
         let statementsModuleReexportedModule =

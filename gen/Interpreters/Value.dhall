@@ -36,14 +36,46 @@ let run =
                           then  "(frequency [(1, pure Nothing), (3, Just <\$> ${scalar.testArbitraryGen})])"
                           else  scalar.testArbitraryGen
 
-                    let testArbitraryGen =
-                          Natural/fold
-                            arraySettings.dimensionality
-                            Text
-                            ( \(inner : Text) ->
-                                "(Data.Vector.fromList <\$> listOf ${inner})"
-                            )
-                            innerElement
+                    let rectangularArbitrary =
+                          let generated =
+                                Natural/fold
+                                  arraySettings.dimensionality
+                                  { nextIndex : Natural
+                                  , bindings : Text
+                                  , exp : Text
+                                  }
+                                  ( \ ( acc
+                                      : { nextIndex : Natural
+                                        , bindings : Text
+                                        , exp : Text
+                                        }
+                                      ) ->
+                                      let dimText = Natural/show acc.nextIndex
+
+                                      let binding =
+                                            if    Natural/isZero
+                                                    ( Natural/subtract
+                                                        acc.nextIndex
+                                                        arraySettings.dimensionality
+                                                    )
+                                            then  "len${dimText} <- chooseInt (0, bound)"
+                                            else  "len${dimText} <- chooseInt (1, positiveBound)"
+
+                                      in  { nextIndex = acc.nextIndex + 1
+                                          , bindings =
+                                              acc.bindings ++ binding ++ "; "
+                                          , exp =
+                                              "(Data.Vector.fromList <\$> vectorOf len${dimText} ${acc.exp})"
+                                          }
+                                  )
+                                  { nextIndex = 1
+                                  , bindings = ""
+                                  , exp = innerElement
+                                  }
+
+                          in  "(sized (\\size -> do { let { bound = max 0 (min 4 size); positiveBound = max 1 bound }; ${generated.bindings}${generated.exp} }))"
+
+                    let testArbitraryGen = rectangularArbitrary
 
                     in  Deps.Lude.Compiled.ok
                           Output

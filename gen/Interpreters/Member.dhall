@@ -16,6 +16,8 @@ let Output =
       , fieldEncoder : Text -> Text
       , fieldDecoder : Text
       , testArbitraryGen : Text
+      , identityRectangularDim : Natural
+      , identityIsNullable : Bool
       }
 
 let run =
@@ -79,6 +81,8 @@ let run =
                           , docs = Some "Maps to @${input.pgName}@."
                           }
                     , testArbitraryGen
+                    , identityRectangularDim = dimensionality
+                    , identityIsNullable = input.isNullable
                     }
           )
           ( Deps.Lude.Compiled.nest

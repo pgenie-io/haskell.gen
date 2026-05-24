@@ -6,7 +6,17 @@ let Project = Deps.Project
 
 let Input = Project.Primitive
 
-let Output = { sig : Text, encoderExp : Text, decoderExp : Text }
+let Output =
+      { sig : Text
+      , encoderExp : Text
+      , decoderExp : Text
+      , testArbitraryGen : Text
+      }
+
+let defaultTestArbitraryGen = "arbitrary"
+
+let safeTextTestArbitraryGen =
+      "(Data.Text.pack <\$> listOf (suchThat arbitrary (\\c -> c /= '\\NUL' && (c < '\\xD800' || c > '\\xDFFF'))))"
 
 let unsupportedType =
       \(type : Text) ->
@@ -20,6 +30,7 @@ let std =
           { sig
           , encoderExp = "Encoders.${codecName}"
           , decoderExp = "Decoders.${codecName}"
+          , testArbitraryGen = defaultTestArbitraryGen
           }
 
 let isScalar =
@@ -29,6 +40,7 @@ let isScalar =
           { sig
           , encoderExp = "IsScalar.encoder"
           , decoderExp = "IsScalar.decoder"
+          , testArbitraryGen = defaultTestArbitraryGen
           }
 
 let run =
@@ -76,7 +88,14 @@ let run =
           , PgSnapshot = unsupportedType "pg_snapshot"
           , Point = isScalar "Pt.Point"
           , Polygon = isScalar "Pt.Polygon"
-          , Text = std "Text" "text"
+          , Text =
+              Deps.Lude.Compiled.ok
+                Output
+                { sig = "Text"
+                , encoderExp = "Encoders.text"
+                , decoderExp = "Decoders.text"
+                , testArbitraryGen = safeTextTestArbitraryGen
+                }
           , Time = isScalar "Pt.Time"
           , Timestamp = isScalar "Pt.Timestamp"
           , Timestamptz = isScalar "Pt.Timestamptz"

@@ -28,7 +28,7 @@ let run =
                       { sig = p.sig
                       , encoderExp = p.encoderExp
                       , decoderExp = p.decoderExp
-                      , testArbitraryGen = "arbitrary"
+                      , testArbitraryGen = p.testArbitraryGen
                       }
                   )
                   (Primitive.run config primitive)
