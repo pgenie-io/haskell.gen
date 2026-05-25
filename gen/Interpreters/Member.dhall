@@ -53,7 +53,7 @@ let run =
 
               let testArbitraryGen =
                     if    input.isNullable
-                    then  "(frequency [(1, pure Nothing), (3, Just <\$> ${value.testArbitraryGen})])"
+                    then  "(liftArbitrary ${value.testArbitraryGen})"
                     else  value.testArbitraryGen
 
               in  Deps.Lude.Compiled.ok

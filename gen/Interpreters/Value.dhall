@@ -33,9 +33,13 @@ let run =
                 input.arraySettings
                 Result
                 ( \(arraySettings : Project.ArraySettings) ->
+                    let isOneDimensional =
+                          Natural/isZero
+                            (Natural/subtract 1 arraySettings.dimensionality)
+
                     let innerElement =
                           if    arraySettings.elementIsNullable
-                          then  "(frequency [(1, pure Nothing), (3, Just <\$> ${scalar.testArbitraryGen})])"
+                          then  "(liftArbitrary ${scalar.testArbitraryGen})"
                           else  scalar.testArbitraryGen
 
                     let rectangularArbitrary =
@@ -89,7 +93,10 @@ let run =
                                   ${Lude.Text.indentNonEmpty 4 generated.exp}
                               )''
 
-                    let testArbitraryGen = rectangularArbitrary
+                    let testArbitraryGen =
+                          if    isOneDimensional
+                          then  "(liftArbitrary ${innerElement})"
+                          else  rectangularArbitrary
 
                     in  Deps.Lude.Compiled.ok
                           Output
