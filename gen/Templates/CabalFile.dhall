@@ -69,7 +69,7 @@ in  Algebra.module
               hasql-postgresql-types >=0.2 && <0.3,
               postgresql-types >=0.1 && <0.2,
               QuickCheck >=2.14 && <3,
-              quickcheck-instances >=0.3 && <0.4,
+              quickcheck-instances ^>=0.4,
               scientific >=0.3 && <0.4,
               text >=1.2 && <3,
               time >=1.9 && <2,
@@ -85,7 +85,7 @@ in  Algebra.module
             default-language: Haskell2010
 
             default-extensions:
-              BlockArguments, OverloadedStrings
+              BlockArguments, OverloadedStrings, ScopedTypeVariables
 
             other-modules:
               ${params.rootNamespace}.StatementsSpec
@@ -105,7 +105,7 @@ in  Algebra.module
               hasql-mapping ^>=0.1,
               hspec >=2.11 && <3,
               QuickCheck >=2.14 && <3,
-              quickcheck-instances >=0.3 && <0.4,
+              quickcheck-instances ^>=0.4,
               testcontainers-postgresql ^>=0.2.0.1,
               text >=1.2 && <3,
               uuid >=1.2 && <2,

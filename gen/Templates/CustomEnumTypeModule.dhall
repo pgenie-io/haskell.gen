@@ -19,11 +19,12 @@ let run =
         module ${params.moduleName} where
 
         import ${params.preludeModuleName}
+        import Test.QuickCheck (Arbitrary (..), elements)
+        import Test.QuickCheck.Instances ()
+
         import qualified Hasql.Decoders
         import qualified Hasql.Encoders
         import qualified Hasql.Mapping.IsScalar
-        import Test.QuickCheck (Arbitrary (..), elements)
-        import Test.QuickCheck.Instances ()
 
         -- |
         -- Representation of the @${params.pgTypeName}@ user-declared PostgreSQL enumeration type.

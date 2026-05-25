@@ -21,14 +21,15 @@ let run =
         module ${params.moduleName} where
 
         import ${params.preludeModuleName}
+        import Test.QuickCheck (Arbitrary (..))
+        import Test.QuickCheck.Instances ()
+
         import qualified Data.Aeson
         import qualified Data.Vector
         import qualified Hasql.Decoders
         import qualified Hasql.Encoders
         import qualified Hasql.Mapping.IsScalar
         import qualified PostgresqlTypes
-        import Test.QuickCheck (Arbitrary (..))
-        import Test.QuickCheck.Instances ()
         ${if    Deps.Prelude.List.null Text params.customTypeModules
           then  ""
           else  Deps.Prelude.Text.concatMapSep

@@ -21,10 +21,12 @@ in  Algebra.module
                 else  Some
                         ''
                         it "executes with arbitrary parameters" \pool ->
-                          property \statementParams ->
+                          property \(statementParams :: ${params.statementsModuleNamespace}.${params.statementModuleName}) ->
                             ioProperty do
                               result <- Hasql.Pool.use pool (Hasql.Session.statement statementParams Hasql.Mapping.IsStatement.statement)
-                              pure (isRight result)''
+                              case result of
+                                Left err -> fail (show err)
+                                Right _ -> pure True''
 
           let identityTestCase =
                 if    params.shouldTestIdentity
@@ -47,11 +49,11 @@ in  Algebra.module
                             ''
                             it "satisfies identity property" \pool ->
                               property \statementParams ->
-                                ioProperty do
-                                  result <- Hasql.Pool.use pool (Hasql.Session.statement statementParams Hasql.Mapping.IsStatement.statement)
-                                  let expectedResult =
-                                        ${Lude.Text.indent 12 expectedResultExp}
-                                  pure (result === Right expectedResult)''
+                                let expectedResult =
+                                      ${Lude.Text.indent 12 expectedResultExp}
+                                    in ioProperty do
+                                      result <- Hasql.Pool.use pool (Hasql.Session.statement statementParams Hasql.Mapping.IsStatement.statement)
+                                      pure (result === Right expectedResult)''
                 else  None Text
 
           let cases =
@@ -65,17 +67,16 @@ in  Algebra.module
           in  ''
               module ${params.moduleNamespace} (spec) where
 
-              import Data.Either (isRight)
+              import Test.Hspec
+              import Test.QuickCheck
+              import Test.QuickCheck.Instances ()
+
               import qualified Data.Text
               import qualified Data.Vector
               import qualified Hasql.Pool
               import qualified Hasql.Mapping.IsStatement
               import qualified Hasql.Session
               import qualified ${params.statementsModuleNamespace}
-
-              import Test.Hspec
-              import Test.QuickCheck
-              import Test.QuickCheck.Instances ()
 
               spec :: SpecWith Hasql.Pool.Pool
               spec = do
