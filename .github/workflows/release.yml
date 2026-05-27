@@ -149,3 +149,23 @@ jobs:
           echo "✓ Successfully deployed Dhall frozen package"
           echo "Release Tag: v${{ inputs.version }}"
           echo "Artifact: package.dhall"
+
+  update-docs:
+    name: Update docs codegen URLs
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger update-codegen-urls workflow on docs repo
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_ACTIONS }}
+        run: |
+          set -euo pipefail
+
+          if ! gh workflow run update-codegen-urls.yml \
+            --repo pgenie-io/docs \
+            --ref master \
+            --field codegen_repo="${{ github.repository }}" \
+            --field release_tag="v${{ inputs.version }}"; then
+            echo "::warning::Failed to trigger pgenie-io/docs/update-codegen-urls.yml for v${{ inputs.version }}."
+          fi
