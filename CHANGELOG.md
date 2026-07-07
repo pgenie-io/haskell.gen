@@ -1,3 +1,9 @@
+# Upcoming
+
+## Breaking
+
+- Updated `gen-sdk` to v0.11.0 and `lude.dhall` to v5.0.0, migrating to contract v4.0. 
+
 # v0.4.0
 
 ## Breaking
