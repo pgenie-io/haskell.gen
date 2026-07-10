@@ -13,7 +13,7 @@ let postgresTag = "postgres:18"
 let Params =
       { statementsSpecModuleNamespace : Text, migrations : List Migration }
 
-in  Sdk.Sigs.Template.module
+in  Sdk.Sigs.template
       Params
       ( \(params : Params) ->
           let runMigrationsBody =

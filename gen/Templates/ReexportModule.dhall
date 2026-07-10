@@ -12,7 +12,7 @@ let Params =
       , reexportedModules : List ReexportedModule
       }
 
-in      Sdk.Sigs.Template.module
+in      Sdk.Sigs.template
           Params
           ( \(params : Params) ->
               let haddock = Haddock.run params.haddock

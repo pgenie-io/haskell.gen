@@ -10,7 +10,7 @@ let Params =
       , surroundingEncoder : Text
       }
 
-in  Sdk.Sigs.Template.module
+in  Sdk.Sigs.template
       Params
       ( \(params : Params) ->
               "(."

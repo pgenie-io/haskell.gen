@@ -4,7 +4,7 @@ let Deps = ../Deps/package.dhall
 
 let Params = Text
 
-in  Sdk.Sigs.Template.module
+in  Sdk.Sigs.template
       Params
       ( \(params : Params) ->
               "\""

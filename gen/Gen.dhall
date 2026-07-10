@@ -2,7 +2,7 @@ let Sdk = ./Deps/Sdk.dhall
 
 let ProjectInterpreter = ./Interpreters/Project.dhall
 
-let Config = ProjectInterpreter.Config
+let Config = {}
 
 let defaultConfig = {=}
 

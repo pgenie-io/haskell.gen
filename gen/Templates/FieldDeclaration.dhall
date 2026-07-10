@@ -2,7 +2,7 @@ let Sdk = ../Deps/Sdk.dhall
 
 let Params = { name : Text, sig : Text, docs : Optional Text }
 
-in  Sdk.Sigs.Template.module
+in  Sdk.Sigs.template
       Params
       ( \(params : Params) ->
           merge

@@ -12,7 +12,7 @@ let Params =
       , identityValueNames : List Text
       }
 
-in  Sdk.Sigs.Template.module
+in  Sdk.Sigs.template
       Params
       ( \(params : Params) ->
           let executesTestCase =

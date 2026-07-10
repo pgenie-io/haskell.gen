@@ -22,7 +22,7 @@ let Params =
       , decoderExp : Text
       }
 
-in  Sdk.Sigs.Template.module
+in  Sdk.Sigs.template
       Params
       ( \(params : Params) ->
           let statementArbitraryExp =

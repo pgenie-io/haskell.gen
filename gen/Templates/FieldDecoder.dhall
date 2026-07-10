@@ -5,7 +5,7 @@ let DimensionalityDecoderExp = ./DimensionalityDecoderExp.dhall
 let Params =
       { nullable : Bool, dimensionality : Natural, elementIsNullable : Bool }
 
-in  Sdk.Sigs.Template.module
+in  Sdk.Sigs.template
       Params
       ( \(params : Params) ->
               ( if    params.nullable

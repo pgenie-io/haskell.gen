@@ -24,4 +24,4 @@ let run =
 
         ''
 
-in  Sdk.Sigs.Template.module Params run
+in  Sdk.Sigs.template Params run

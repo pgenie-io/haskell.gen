@@ -4,7 +4,7 @@ let Deps = ../Deps/package.dhall
 
 let Params = { name : Text, fields : List Text }
 
-in  Sdk.Sigs.Template.module
+in  Sdk.Sigs.template
       Params
       ( \(params : Params) ->
           let length = List/length Text params.fields
