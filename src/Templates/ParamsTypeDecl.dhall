@@ -1,6 +1,8 @@
 let Sdk = ../Deps/Sdk.dhall
 
-let Deps = ../Deps/package.dhall
+let Lude = ../Deps/Lude.dhall
+
+let Prelude = ../Deps/Prelude.dhall
 
 let RecordDeclaration = ./RecordDeclaration.dhall
 
@@ -21,7 +23,7 @@ in  Sdk.Sigs.template
           --
           -- ==== SQL Template
           --
-          -- > ${Deps.Lude.Text.prefixEachLine "-- > " params.sqlForDocs}
+          -- > ${Lude.Text.prefixEachLine "-- > " params.sqlForDocs}
           --
           -- ==== Source Path
           --

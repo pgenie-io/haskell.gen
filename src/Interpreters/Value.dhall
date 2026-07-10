@@ -1,5 +1,3 @@
-let InterpreterConfig = ../InterpreterConfig.dhall
-
 let Lude = ../Deps/Lude.dhall
 
 let Prelude = ../Deps/Prelude.dhall
@@ -11,6 +9,8 @@ let Sdk = ../Deps/Sdk.dhall
 let Templates = ../Templates/package.dhall
 
 let Scalar = ./Scalar.dhall
+
+let Config = { rootNamespace : List Text }
 
 let Input = Contract.Value
 
@@ -24,7 +24,7 @@ let Output =
 let Result = Lude.Compiled.Type Output
 
 let run =
-      \(config : InterpreterConfig.Type) ->
+      \(config : Config) ->
       \(input : Input) ->
         Lude.Compiled.flatMap
           Scalar.Output
@@ -85,9 +85,7 @@ let run =
                                   }
 
                           let statements =
-                                Prelude.Text.concatSep
-                                  "\n"
-                                  generated.bindings
+                                Prelude.Text.concatSep "\n" generated.bindings
 
                           in  ''
                               ( sized \size -> do
@@ -137,4 +135,4 @@ let run =
           )
           (Scalar.run config input.scalar)
 
-in  Sdk.Sigs.interpreter InterpreterConfig.Type Input Output run
+in  Sdk.Sigs.interpreter Config Input Output run

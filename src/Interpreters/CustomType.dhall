@@ -1,5 +1,3 @@
-let InterpreterConfig = ../InterpreterConfig.dhall
-
 let Contract = ../Deps/Contract.dhall
 
 let Lude = ../Deps/Lude.dhall
@@ -12,6 +10,8 @@ let Templates = ../Templates/package.dhall
 
 let MemberGen = ./Member.dhall
 
+let Config = { rootNamespace : List Text }
+
 let Input = Contract.CustomType
 
 let Output =
@@ -22,15 +22,14 @@ let Output =
       }
 
 let run =
-      \(config : InterpreterConfig.Type) ->
+      \(config : Config) ->
       \(input : Input) ->
         let moduleName = input.name.inPascalCase
 
         let moduleNamespaceAsList =
               config.rootNamespace # [ "Types", input.name.inPascalCase ]
 
-        let moduleNamespace =
-              Prelude.Text.concatSep "." moduleNamespaceAsList
+        let moduleNamespace = Prelude.Text.concatSep "." moduleNamespaceAsList
 
         let modulePath =
               Templates.ModulePath.run { namespace = moduleNamespaceAsList }
@@ -162,4 +161,4 @@ let run =
               }
               input.definition
 
-in  Sdk.Sigs.interpreter InterpreterConfig.Type Input Output run
+in  Sdk.Sigs.interpreter Config Input Output run

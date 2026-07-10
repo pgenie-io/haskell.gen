@@ -1,5 +1,3 @@
-let InterpreterConfig = ../InterpreterConfig.dhall
-
 let Contract = ../Deps/Contract.dhall
 
 let Lude = ../Deps/Lude.dhall
@@ -18,6 +16,8 @@ let QueryFragmentsModule = ./QueryFragments.dhall
 
 let MemberModule = ./Member.dhall
 
+let Config = { rootNamespace : List Text }
+
 let Input = Contract.Query
 
 let Output =
@@ -34,7 +34,7 @@ let Output =
       }
 
 let render =
-      \(config : InterpreterConfig.Type) ->
+      \(config : Config) ->
       \(input : Input) ->
       \(result : ResultModule.Output) ->
       \(fragments : QueryFragmentsModule.Output) ->
@@ -65,15 +65,12 @@ let render =
 
         let statementTestModulePath =
                   "test/"
-              ++  Prelude.Text.concatSep
-                    "/"
-                    statementTestModuleNamespaceAsList
+              ++  Prelude.Text.concatSep "/" statementTestModuleNamespaceAsList
               ++  ".hs"
 
         let result = result statementModuleName
 
-        let projectNamespace =
-              Prelude.Text.concatSep "." config.rootNamespace
+        let projectNamespace = Prelude.Text.concatSep "." config.rootNamespace
 
         let queryName = input.name.inSnakeCase
 
@@ -150,7 +147,7 @@ let render =
             }
 
 let run =
-      \(config : InterpreterConfig.Type) ->
+      \(config : Config) ->
       \(input : Input) ->
         Lude.Compiled.nest
           Output
@@ -187,4 +184,4 @@ let run =
               )
           )
 
-in  Sdk.Sigs.interpreter InterpreterConfig.Type Input Output run
+in  Sdk.Sigs.interpreter Config Input Output run

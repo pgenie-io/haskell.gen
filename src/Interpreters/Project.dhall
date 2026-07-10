@@ -1,5 +1,3 @@
-let InterpreterConfig = ../InterpreterConfig.dhall
-
 let Contract = ../Deps/Contract.dhall
 
 let Lude = ../Deps/Lude.dhall
@@ -18,6 +16,8 @@ let CustomTypeGen = ./CustomType.dhall
 
 let Config = {}
 
+let Resolved = { rootNamespace : List Text }
+
 let Input = Contract.Project
 
 let Output = List Lude.File.Type
@@ -27,17 +27,16 @@ let resolve =
           { rootNamespace =
             [ input.space.inPascalCase, input.name.inPascalCase ]
           }
-        : InterpreterConfig.Type
+        : Resolved
 
 let combineOutputs =
-      \(config : InterpreterConfig.Type) ->
+      \(resolved : Resolved) ->
       \(input : Input) ->
       \(queries : List QueryGen.Output) ->
       \(customTypes : List CustomTypeGen.Output) ->
-        let projectNamespace =
-              Prelude.Text.concatSep "." config.rootNamespace
+        let projectNamespace = Prelude.Text.concatSep "." resolved.rootNamespace
 
-        let rootNamespace = Prelude.Text.concatSep "." config.rootNamespace
+        let rootNamespace = Prelude.Text.concatSep "." resolved.rootNamespace
 
         let customTypeFiles
             : List Lude.File.Type
@@ -79,7 +78,7 @@ let combineOutputs =
             : Lude.File.Type
             = { path =
                   Templates.ModulePath.run
-                    { namespace = config.rootNamespace # [ "Prelude" ] }
+                    { namespace = resolved.rootNamespace # [ "Prelude" ] }
               , content = Templates.PreludeModule.run { projectNamespace }
               }
 
@@ -91,7 +90,7 @@ let combineOutputs =
                       "test/"
                   ++  Prelude.Text.concatSep
                         "/"
-                        (config.rootNamespace # [ "StatementsSpec" ])
+                        (resolved.rootNamespace # [ "StatementsSpec" ])
                   ++  ".hs"
               , content =
                   Templates.StatementsSpecModule.run
@@ -122,7 +121,7 @@ let combineOutputs =
             : Lude.File.Type
             = { path =
                   Templates.ModulePath.run
-                    { namespace = config.rootNamespace # [ "Types" ] }
+                    { namespace = resolved.rootNamespace # [ "Types" ] }
               , content =
                   Templates.ReexportModule.run
                     { haddock = None Text
@@ -144,7 +143,7 @@ let combineOutputs =
             : Lude.File.Type
             = { path =
                   Templates.ModulePath.run
-                    { namespace = config.rootNamespace # [ "Statements" ] }
+                    { namespace = resolved.rootNamespace # [ "Statements" ] }
               , content =
                   Templates.ReexportModule.run
                     { haddock = Some
@@ -239,7 +238,7 @@ let run =
                       Lude.Compiled.Type
                       Lude.Compiled.alternative
                       QueryGen.Output
-                      (QueryGen.run resolvedConfig query)
+                      (QueryGen.run resolvedConfig.{ rootNamespace } query)
                 )
                 input.queries
 
@@ -256,7 +255,7 @@ let run =
             = Lude.Compiled.traverseList
                 Contract.CustomType
                 CustomTypeGen.Output
-                (CustomTypeGen.run resolvedConfig)
+                (CustomTypeGen.run resolvedConfig.{ rootNamespace })
                 input.customTypes
 
         let files

@@ -1,6 +1,8 @@
 let Sdk = ../Deps/Sdk.dhall
 
-let Deps = ../Deps/package.dhall
+let Lude = ../Deps/Lude.dhall
+
+let Prelude = ../Deps/Prelude.dhall
 
 let Params = { name : Text, fields : List Text }
 
@@ -9,12 +11,12 @@ in  Sdk.Sigs.template
       ( \(params : Params) ->
           let length = List/length Text params.fields
 
-          in  if    Deps.Prelude.Natural.greaterThan length 1
+          in  if    Prelude.Natural.greaterThan length 1
               then  ''
                     data ${params.name} = ${params.name}
-                      { ${Deps.Lude.Text.indent
+                      { ${Lude.Text.indent
                             4
-                            ( Deps.Prelude.Text.concatSep
+                            ( Prelude.Text.concatSep
                                 ''
                                 ,
                                 ''
@@ -27,7 +29,7 @@ in  Sdk.Sigs.template
                           \(field : Text) ->
                             ''
                             newtype ${params.name} = ${params.name}
-                              { ${Deps.Lude.Text.indent 4 field}
+                              { ${Lude.Text.indent 4 field}
                               }''
                       }
                       (List/head Text params.fields)

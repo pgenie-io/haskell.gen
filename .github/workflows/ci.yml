@@ -31,17 +31,17 @@ jobs:
         with:
           ref: ${{ inputs.ref || github.sha }}
 
-      - name: Build matrix from tests directory
+      - name: Build matrix from demos directory
         id: discover
         shell: bash
         run: |
           set -euo pipefail
 
           shopt -s nullglob
-          entries=(tests/*)
+          entries=(demos/*)
 
           if [[ ${#entries[@]} -eq 0 ]]; then
-            echo "::error::No entries were found under tests/."
+            echo "::error::No entries were found under demos/."
             exit 1
           fi
 
@@ -50,7 +50,7 @@ jobs:
 
           for entry in "${entries[@]}"; do
             if [[ ! -f "$entry" ]]; then
-              echo "::error::tests entry '$entry' is not a file."
+              echo "::error::demos entry '$entry' is not a file."
               exit 1
             fi
 

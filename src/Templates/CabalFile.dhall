@@ -1,6 +1,8 @@
 let Sdk = ../Deps/Sdk.dhall
 
-let Deps = ../Deps/package.dhall
+let Lude = ../Deps/Lude.dhall
+
+let Prelude = ../Deps/Prelude.dhall
 
 let Params =
       { packageName : Text
@@ -46,14 +48,14 @@ in  Sdk.Sigs.template
               
             other-modules:
               ${params.rootNamespace}.Prelude
-              ${Deps.Prelude.Text.concatMapSep
+              ${Prelude.Text.concatMapSep
                   ("\n" ++ "    ")
                   Text
                   ( \(name : Text) ->
                       params.rootNamespace ++ ".Statements." ++ name
                   )
                   params.statementModuleNames}
-              ${Deps.Prelude.Text.concatMapSep
+              ${Prelude.Text.concatMapSep
                   ("\n" ++ "    ")
                   Text
                   (\(name : Text) -> params.rootNamespace ++ ".Types." ++ name)
@@ -89,7 +91,7 @@ in  Sdk.Sigs.template
 
             other-modules:
               ${params.rootNamespace}.StatementsSpec
-              ${Deps.Prelude.Text.concatMapSep
+              ${Prelude.Text.concatMapSep
                   ("\n" ++ "    ")
                   Text
                   ( \(name : Text) ->

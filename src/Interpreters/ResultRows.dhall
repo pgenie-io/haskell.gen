@@ -1,5 +1,3 @@
-let InterpreterConfig = ../InterpreterConfig.dhall
-
 let Templates = ../Templates/package.dhall
 
 let Lude = ../Deps/Lude.dhall
@@ -14,12 +12,14 @@ let Member = ./Member.dhall
 
 let Contract = ../Deps/Contract.dhall
 
+let Config = { rootNamespace : List Text }
+
 let Input = Contract.ResultRows
 
 let Output = Text -> { decoderExp : Text, typeDecls : Text }
 
 let run =
-      \(config : InterpreterConfig.Type) ->
+      \(config : Config) ->
       \(input : Input) ->
         let compiledColumns =
               Typeclasses.Classes.Applicative.traverseList
@@ -108,4 +108,4 @@ let run =
               )
               compiledColumns
 
-in  Sdk.Sigs.interpreter InterpreterConfig.Type Input Output run
+in  Sdk.Sigs.interpreter Config Input Output run

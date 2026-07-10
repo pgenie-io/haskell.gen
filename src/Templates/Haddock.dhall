@@ -1,6 +1,8 @@
 let Sdk = ../Deps/Sdk.dhall
 
-let Deps = ../Deps/package.dhall
+let Lude = ../Deps/Lude.dhall
+
+let Prelude = ../Deps/Prelude.dhall
 
 let Params = Optional Text
 
@@ -11,7 +13,7 @@ in  Sdk.Sigs.template
             { None = ""
             , Some =
                 \(text : Text) ->
-                  "-- | " ++ Deps.Lude.Text.prefixEachLine "-- " text ++ "\n"
+                  "-- | " ++ Lude.Text.prefixEachLine "-- " text ++ "\n"
             }
             params
       )

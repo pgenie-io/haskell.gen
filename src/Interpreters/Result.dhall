@@ -1,5 +1,3 @@
-let InterpreterConfig = ../InterpreterConfig.dhall
-
 let ResultRows = ./ResultRows.dhall
 
 let Contract = ../Deps/Contract.dhall
@@ -7,6 +5,8 @@ let Contract = ../Deps/Contract.dhall
 let Lude = ../Deps/Lude.dhall
 
 let Sdk = ../Deps/Sdk.dhall
+
+let Config = { rootNamespace : List Text }
 
 let Input = Contract.Result
 
@@ -41,7 +41,7 @@ let voidResult
         )
 
 let run =
-      \(config : InterpreterConfig.Type) ->
+      \(config : Config) ->
       \(input : Input) ->
         merge
           { Void = voidResult
@@ -50,4 +50,4 @@ let run =
           }
           input
 
-in  Sdk.Sigs.interpreter InterpreterConfig.Type Input Output run
+in  Sdk.Sigs.interpreter Config Input Output run

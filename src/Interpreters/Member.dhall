@@ -1,5 +1,3 @@
-let InterpreterConfig = ../InterpreterConfig.dhall
-
 let Contract = ../Deps/Contract.dhall
 
 let Lude = ../Deps/Lude.dhall
@@ -9,6 +7,8 @@ let Sdk = ../Deps/Sdk.dhall
 let Value = ./Value.dhall
 
 let Templates = ../Templates/package.dhall
+
+let Config = { rootNamespace : List Text }
 
 let Input = Contract.Member
 
@@ -23,7 +23,7 @@ let Output =
       }
 
 let run =
-      \(config : InterpreterConfig.Type) ->
+      \(config : Config) ->
       \(input : Input) ->
         Lude.Compiled.flatMap
           Value.Output
@@ -93,4 +93,4 @@ let run =
               (Value.run config input.value)
           )
 
-in  Sdk.Sigs.interpreter InterpreterConfig.Type Input Output run
+in  Sdk.Sigs.interpreter Config Input Output run

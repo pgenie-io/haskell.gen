@@ -1,6 +1,8 @@
 let Sdk = ../Deps/Sdk.dhall
 
-let Deps = ../Deps/package.dhall
+let Lude = ../Deps/Lude.dhall
+
+let Prelude = ../Deps/Prelude.dhall
 
 let Haddock = ./Haddock.dhall
 
@@ -18,7 +20,7 @@ in      Sdk.Sigs.template
               let haddock = Haddock.run params.haddock
 
               let importsBlock =
-                    Deps.Prelude.Text.concatMapSep
+                    Prelude.Text.concatMapSep
                       "\n"
                       ReexportedModule
                       ( \(module : ReexportedModule) ->
@@ -27,20 +29,18 @@ in      Sdk.Sigs.template
                       params.reexportedModules
 
               let exportsBlock =
-                    Deps.Prelude.Text.concatMapSep
+                    Prelude.Text.concatMapSep
                       "\n"
                       ReexportedModule
                       ( \(module : ReexportedModule) ->
                           let haddock =
-                                Deps.Prelude.Optional.fold
+                                Prelude.Optional.fold
                                   Text
                                   module.header
                                   Text
                                   ( \(header : Text) ->
                                           "-- ** "
-                                      ++  Deps.Lude.Text.prefixEachLine
-                                            "-- "
-                                            header
+                                      ++  Lude.Text.prefixEachLine "-- " header
                                       ++  "\n"
                                   )
                                   ""
@@ -51,7 +51,7 @@ in      Sdk.Sigs.template
 
               in  ''
                   ${haddock}module ${params.namespace} 
-                    ( ${Deps.Lude.Text.indent 4 exportsBlock}
+                    ( ${Lude.Text.indent 4 exportsBlock}
                     )
                   where
 

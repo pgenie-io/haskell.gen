@@ -1,6 +1,8 @@
 let Sdk = ../Deps/Sdk.dhall
 
-let Deps = ../Deps/package.dhall
+let Lude = ../Deps/Lude.dhall
+
+let Prelude = ../Deps/Prelude.dhall
 
 let Lude = ../Deps/Lude.dhall
 
@@ -26,14 +28,14 @@ in  Sdk.Sigs.template
       Params
       ( \(params : Params) ->
           let statementArbitraryExp =
-                if    Deps.Prelude.List.null Text params.statementArbitraryGens
+                if    Prelude.List.null Text params.statementArbitraryGens
                 then  "pure ${params.statementTypeName}"
                 else  ''
                       ${params.statementTypeName}
                         ${Lude.Text.indent
                             2
                             ''
-                            <$> ${Deps.Prelude.Text.concatMapSep
+                            <$> ${Prelude.Text.concatMapSep
                                     ''
 
                                     <*> ''
@@ -94,7 +96,7 @@ in  Sdk.Sigs.template
                       mconcat
                         [ ${Lude.Text.indent
                               12
-                              ( Deps.Prelude.Text.concatSep
+                              ( Prelude.Text.concatSep
                                   ''
                                   ,
                                   ''

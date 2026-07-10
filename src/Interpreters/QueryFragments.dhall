@@ -1,5 +1,3 @@
-let InterpreterConfig = ../InterpreterConfig.dhall
-
 let Prelude = ../Deps/Prelude.dhall
 
 let Lude = ../Deps/Lude.dhall
@@ -7,6 +5,8 @@ let Lude = ../Deps/Lude.dhall
 let Contract = ../Deps/Contract.dhall
 
 let Sdk = ../Deps/Sdk.dhall
+
+let Config = { rootNamespace : List Text }
 
 let Input = Contract.QueryFragments
 
@@ -54,10 +54,10 @@ let renderHaddock
         )
 
 let run =
-      \(config : InterpreterConfig.Type) ->
+      \(config : Config) ->
       \(input : Input) ->
         Lude.Compiled.ok
           Output
           { exp = renderExp input, haddock = renderHaddock input }
 
-in  Sdk.Sigs.interpreter InterpreterConfig.Type Input Output run
+in  Sdk.Sigs.interpreter Config Input Output run

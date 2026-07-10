@@ -1,6 +1,8 @@
 let Sdk = ../Deps/Sdk.dhall
 
-let Deps = ../Deps/package.dhall
+let Lude = ../Deps/Lude.dhall
+
+let Prelude = ../Deps/Prelude.dhall
 
 let Params =
       { preludeModuleName : Text
@@ -30,9 +32,9 @@ let run =
         import qualified Hasql.Encoders
         import qualified Hasql.Mapping.IsScalar
         import qualified PostgresqlTypes
-        ${if    Deps.Prelude.List.null Text params.customTypeModules
+        ${if    Prelude.List.null Text params.customTypeModules
           then  ""
-          else  Deps.Prelude.Text.concatMapSep
+          else  Prelude.Text.concatMapSep
                   "\n"
                   Text
                   (\(m : Text) -> "import ${m}")
@@ -41,9 +43,9 @@ let run =
         -- |
         -- Representation of the @${params.pgTypeName}@ user-declared PostgreSQL record type.
         data ${params.typeName} = ${params.typeName}
-          { ${Deps.Lude.Text.indent
+          { ${Lude.Text.indent
                 4
-                ( Deps.Prelude.Text.concatSep
+                ( Prelude.Text.concatSep
                     ''
                     ,
                     ''
@@ -54,12 +56,12 @@ let run =
 
         instance Arbitrary ${params.typeName} where
           arbitrary =
-            ${Deps.Lude.Text.indent
+            ${Lude.Text.indent
                 12
-                ( if    Deps.Prelude.List.null Text params.fieldNames
+                ( if    Prelude.List.null Text params.fieldNames
                   then  "pure ${params.typeName}"
                   else      "${params.typeName} <\$> "
-                        ++  Deps.Prelude.Text.concatMapSep
+                        ++  Prelude.Text.concatMapSep
                               " <*> "
                               Text
                               (\(_ : Text) -> "arbitrary")
@@ -72,9 +74,9 @@ let run =
               (Just "${params.pgSchema}")
               "${params.pgTypeName}"
               ( mconcat
-                  [ ${Deps.Lude.Text.indent
+                  [ ${Lude.Text.indent
                         12
-                        ( Deps.Prelude.Text.concatSep
+                        ( Prelude.Text.concatSep
                             ''
                             ,
                             ''
@@ -88,9 +90,9 @@ let run =
               (Just "${params.pgSchema}")
               "${params.pgTypeName}"
               ( ${params.typeName}
-                  <$> ${Deps.Lude.Text.indent
+                  <$> ${Lude.Text.indent
                           10
-                          ( Deps.Prelude.Text.concatMapSep
+                          ( Prelude.Text.concatMapSep
                               ''
 
                               <*> ''
