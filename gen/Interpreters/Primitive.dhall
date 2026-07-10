@@ -1,10 +1,10 @@
 let Deps = ../Deps/package.dhall
 
-let Algebra = ./Algebra/package.dhall
+let ResolvedTarget = ../ResolvedTarget.dhall
 
-let Project = Deps.Project
+let Contract = Deps.Contract
 
-let Input = Project.Primitive
+let Input = Contract.Primitive
 
 let Output =
       { sig : Text
@@ -55,7 +55,7 @@ let isScalar =
           }
 
 let run =
-      \(config : Algebra.Config) ->
+      \(config : ResolvedTarget.Type) ->
       \(input : Input) ->
         merge
           { Bit = isScalar "PostgresqlTypes.Bit 1"
@@ -144,4 +144,4 @@ let run =
           }
           input
 
-in  Algebra.module Input Output run
+in  Deps.Sdk.Sigs.Interpreter.module ResolvedTarget.Type Input Output run

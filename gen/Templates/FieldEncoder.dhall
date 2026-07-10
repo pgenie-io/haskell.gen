@@ -1,4 +1,4 @@
-let Algebra = ./Algebra/package.dhall
+let Sdk = ../Deps/Sdk.dhall
 
 let DimensionalityEncoderExp = ./DimensionalityEncoderExp.dhall
 
@@ -10,7 +10,7 @@ let Params =
       , surroundingEncoder : Text
       }
 
-in  Algebra.module
+in  Sdk.Sigs.Template.module
       Params
       ( \(params : Params) ->
               "(."

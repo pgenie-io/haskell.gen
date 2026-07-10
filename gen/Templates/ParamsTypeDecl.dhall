@@ -1,4 +1,4 @@
-let Algebra = ./Algebra/package.dhall
+let Sdk = ../Deps/Sdk.dhall
 
 let Deps = ../Deps/package.dhall
 
@@ -12,7 +12,7 @@ let Params =
       , fields : List Text
       }
 
-in  Algebra.module
+in  Sdk.Sigs.Template.module
       Params
       ( \(params : Params) ->
           ''

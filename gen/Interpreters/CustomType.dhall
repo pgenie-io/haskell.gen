@@ -1,14 +1,14 @@
 let Deps = ../Deps/package.dhall
 
-let Algebra = ./Algebra/package.dhall
+let ResolvedTarget = ../ResolvedTarget.dhall
 
-let Project = Deps.Project
+let Contract = Deps.Contract
 
 let Templates = ../Templates/package.dhall
 
 let MemberGen = ./Member.dhall
 
-let Input = Project.CustomType
+let Input = Contract.CustomType
 
 let Output =
       { moduleName : Text
@@ -18,7 +18,7 @@ let Output =
       }
 
 let run =
-      \(config : Algebra.Config) ->
+      \(config : ResolvedTarget.Type) ->
       \(input : Input) ->
         let moduleName = input.name.inPascalCase
 
@@ -38,11 +38,11 @@ let run =
 
         in  merge
               { Composite =
-                  \(members : List Project.Member) ->
+                  \(members : List Contract.Member) ->
                     let compiledMembers
                         : Deps.Lude.Compiled.Type (List MemberGen.Output)
                         = Deps.Lude.Compiled.traverseList
-                            Project.Member
+                            Contract.Member
                             MemberGen.Output
                             (MemberGen.run config)
                             members
@@ -50,14 +50,14 @@ let run =
                     let customTypeModules
                         : List Text
                         = Deps.Prelude.List.mapMaybe
-                            Project.Member
+                            Contract.Member
                             Text
-                            ( \(member : Project.Member) ->
+                            ( \(member : Contract.Member) ->
                                 merge
                                   { Primitive =
-                                      \(_ : Project.Primitive) -> None Text
+                                      \(_ : Contract.Primitive) -> None Text
                                   , Custom =
-                                      \(name : Project.Name) ->
+                                      \(name : Contract.Name) ->
                                         Some
                                           ( Deps.Prelude.Text.concatSep
                                               "."
@@ -127,7 +127,7 @@ let run =
 
                     in  compiledOutput
               , Enum =
-                  \(variants : List Project.EnumVariant) ->
+                  \(variants : List Contract.EnumVariant) ->
                     Deps.Lude.Compiled.ok
                       Output
                       { moduleName
@@ -142,9 +142,9 @@ let run =
                             , pgTypeName = input.pgName
                             , variants =
                                 Deps.Prelude.List.map
-                                  Project.EnumVariant
+                                  Contract.EnumVariant
                                   Templates.CustomEnumTypeModule.Variant
-                                  ( \(variant : Project.EnumVariant) ->
+                                  ( \(variant : Contract.EnumVariant) ->
                                       { name = variant.name.inPascalCase
                                       , pgValue = variant.pgName
                                       }
@@ -153,11 +153,11 @@ let run =
                             }
                       }
               , Domain =
-                  \(value : Project.Value) ->
+                  \(value : Contract.Value) ->
                     Deps.Lude.Compiled.message
                       Output
                       "Domain types are not yet supported."
               }
               input.definition
 
-in  Algebra.module Input Output run
+in  Deps.Sdk.Sigs.Interpreter.module ResolvedTarget.Type Input Output run

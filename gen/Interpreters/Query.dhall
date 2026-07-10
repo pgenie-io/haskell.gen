@@ -1,6 +1,6 @@
 let Deps = ../Deps/package.dhall
 
-let Algebra = ./Algebra/package.dhall
+let ResolvedTarget = ../ResolvedTarget.dhall
 
 let Typeclasses = ../Deps/Typeclasses.dhall
 
@@ -12,7 +12,7 @@ let QueryFragmentsModule = ./QueryFragments.dhall
 
 let MemberModule = ./Member.dhall
 
-let Input = Deps.Project.Query
+let Input = Deps.Contract.Query
 
 let Output =
       { statementModuleName : Text
@@ -28,7 +28,7 @@ let Output =
       }
 
 let render =
-      \(config : Algebra.Config) ->
+      \(config : ResolvedTarget.Type) ->
       \(input : Input) ->
       \(result : ResultModule.Output) ->
       \(fragments : QueryFragmentsModule.Output) ->
@@ -144,7 +144,7 @@ let render =
             }
 
 let run =
-      \(config : Algebra.Config) ->
+      \(config : ResolvedTarget.Type) ->
       \(input : Input) ->
         Deps.Lude.Compiled.nest
           Output
@@ -173,7 +173,7 @@ let run =
                   ( Typeclasses.Classes.Applicative.traverseList
                       Deps.Lude.Compiled.Type
                       Deps.Lude.Compiled.applicative
-                      Deps.Project.Member
+                      Deps.Contract.Member
                       MemberModule.Output
                       (MemberModule.run config)
                       input.params
@@ -181,4 +181,4 @@ let run =
               )
           )
 
-in  Algebra.module Input Output run
+in  Deps.Sdk.Sigs.Interpreter.module ResolvedTarget.Type Input Output run

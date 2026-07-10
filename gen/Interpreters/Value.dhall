@@ -1,16 +1,16 @@
 let Deps = ../Deps/package.dhall
 
-let Algebra = ./Algebra/package.dhall
+let ResolvedTarget = ../ResolvedTarget.dhall
 
 let Lude = Deps.Lude
 
-let Project = Deps.Project
+let Contract = Deps.Contract
 
 let Templates = ../Templates/package.dhall
 
 let Scalar = ./Scalar.dhall
 
-let Input = Project.Value
+let Input = Contract.Value
 
 let Output =
       { sig : Text
@@ -22,17 +22,17 @@ let Output =
 let Result = Deps.Lude.Compiled.Type Output
 
 let run =
-      \(config : Algebra.Config) ->
+      \(config : ResolvedTarget.Type) ->
       \(input : Input) ->
         Deps.Lude.Compiled.flatMap
           Scalar.Output
           Output
           ( \(scalar : Scalar.Output) ->
               Deps.Prelude.Optional.fold
-                Project.ArraySettings
+                Contract.ArraySettings
                 input.arraySettings
                 Result
-                ( \(arraySettings : Project.ArraySettings) ->
+                ( \(arraySettings : Contract.ArraySettings) ->
                     let isOneDimensional =
                           Natural/isZero
                             (Natural/subtract 1 arraySettings.dimensionality)
@@ -135,4 +135,4 @@ let run =
           )
           (Scalar.run config input.scalar)
 
-in  Algebra.module Input Output run
+in  Deps.Sdk.Sigs.Interpreter.module ResolvedTarget.Type Input Output run

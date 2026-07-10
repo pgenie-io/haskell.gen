@@ -1,11 +1,11 @@
-let Algebra = ./Algebra/package.dhall
+let Sdk = ../Deps/Sdk.dhall
 
 let DimensionalityDecoderExp = ./DimensionalityDecoderExp.dhall
 
 let Params =
       { nullable : Bool, dimensionality : Natural, elementIsNullable : Bool }
 
-in  Algebra.module
+in  Sdk.Sigs.Template.module
       Params
       ( \(params : Params) ->
               ( if    params.nullable

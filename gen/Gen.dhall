@@ -1,1 +1,3 @@
-let Sdk = ./Deps/GenSdk.dhall in Sdk.module ./Config.dhall ./compile.dhall
+let Contract = ./Deps/Contract.dhall
+
+in  Contract.module ./Config.dhall ./compile.dhall

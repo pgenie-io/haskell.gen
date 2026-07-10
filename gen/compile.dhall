@@ -1,14 +1,11 @@
-let Project = ./Deps/Project.dhall
+let Contract = ./Deps/Contract.dhall
 
 let Config = ./Config.dhall
+
+let ResolvedTarget = ./ResolvedTarget.dhall
 
 let ProjectInterpreter = ./Interpreters/Project.dhall
 
 in  \(config : Optional Config) ->
-    \(project : Project.Project) ->
-      let interpreterConfig =
-            { rootNamespace =
-              [ project.space.inPascalCase, project.name.inPascalCase ]
-            }
-
-      in  ProjectInterpreter.run interpreterConfig project
+    \(project : Contract.Project) ->
+      ProjectInterpreter.run (ResolvedTarget.resolve config project) project

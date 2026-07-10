@@ -1,10 +1,10 @@
-let Algebra = ./Algebra/package.dhall
+let Sdk = ../Deps/Sdk.dhall
 
 let Deps = ../Deps/package.dhall
 
 let Params = { name : Text, fields : List Text }
 
-in  Algebra.module
+in  Sdk.Sigs.Template.module
       Params
       ( \(params : Params) ->
           let length = List/length Text params.fields

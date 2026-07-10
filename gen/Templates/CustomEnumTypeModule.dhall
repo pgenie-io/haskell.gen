@@ -1,5 +1,3 @@
-let Algebra = ./Algebra/package.dhall
-
 let Deps = ../Deps/package.dhall
 
 let Variant = { name : Text, pgValue : Text }

@@ -1,8 +1,8 @@
-let Algebra = ./Algebra/package.dhall
+let Sdk = ../Deps/Sdk.dhall
 
 let Params = { name : Text, sig : Text, docs : Optional Text }
 
-in  Algebra.module
+in  Sdk.Sigs.Template.module
       Params
       ( \(params : Params) ->
           merge

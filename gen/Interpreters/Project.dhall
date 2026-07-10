@@ -1,8 +1,8 @@
 let Deps = ../Deps/package.dhall
 
-let Algebra = ./Algebra/package.dhall
+let ResolvedTarget = ../ResolvedTarget.dhall
 
-let Project = Deps.Project
+let Contract = Deps.Contract
 
 let Templates = ../Templates/package.dhall
 
@@ -10,12 +10,12 @@ let QueryGen = ./Query.dhall
 
 let CustomTypeGen = ./CustomType.dhall
 
-let Input = Project.Project
+let Input = Contract.Project
 
 let Output = List Deps.Lude.File.Type
 
 let combineOutputs =
-      \(config : Algebra.Config) ->
+      \(config : ResolvedTarget.Type) ->
       \(input : Input) ->
       \(queries : List QueryGen.Output) ->
       \(customTypes : List CustomTypeGen.Output) ->
@@ -210,14 +210,14 @@ let combineOutputs =
             : List Deps.Lude.File.Type
 
 let run =
-      \(config : Algebra.Config) ->
+      \(config : ResolvedTarget.Type) ->
       \(input : Input) ->
         let compiledQueries
             : Deps.Lude.Compiled.Type (List (Optional QueryGen.Output))
             = Deps.Lude.Compiled.traverseList
-                Project.Query
+                Contract.Query
                 (Optional QueryGen.Output)
-                ( \(query : Project.Query) ->
+                ( \(query : Contract.Query) ->
                     Deps.Typeclasses.Classes.Alternative.optional
                       Deps.Lude.Compiled.Type
                       Deps.Lude.Compiled.alternative
@@ -237,7 +237,7 @@ let run =
         let compiledTypes
             : Deps.Lude.Compiled.Type (List CustomTypeGen.Output)
             = Deps.Lude.Compiled.traverseList
-                Project.CustomType
+                Contract.CustomType
                 CustomTypeGen.Output
                 (CustomTypeGen.run config)
                 input.customTypes
@@ -254,4 +254,4 @@ let run =
 
         in  files
 
-in  Algebra.module Input Output run
+in  Deps.Sdk.Sigs.Interpreter.module ResolvedTarget.Type Input Output run

@@ -1,14 +1,14 @@
 let Deps = ../Deps/package.dhall
 
-let Algebra = ./Algebra/package.dhall
+let ResolvedTarget = ../ResolvedTarget.dhall
 
-let Project = Deps.Project
+let Contract = Deps.Contract
 
 let Value = ./Value.dhall
 
 let Templates = ../Templates/package.dhall
 
-let Input = Project.Member
+let Input = Contract.Member
 
 let Output =
       { fieldName : Text
@@ -21,7 +21,7 @@ let Output =
       }
 
 let run =
-      \(config : Algebra.Config) ->
+      \(config : ResolvedTarget.Type) ->
       \(input : Input) ->
         Deps.Lude.Compiled.flatMap
           Value.Output
@@ -32,7 +32,7 @@ let run =
               let dimensionality =
                     merge
                       { Some =
-                          \(arraySettings : Project.ArraySettings) ->
+                          \(arraySettings : Contract.ArraySettings) ->
                             arraySettings.dimensionality
                       , None = 0
                       }
@@ -41,7 +41,7 @@ let run =
               let elementIsNullable =
                     merge
                       { Some =
-                          \(arraySettings : Project.ArraySettings) ->
+                          \(arraySettings : Contract.ArraySettings) ->
                             arraySettings.elementIsNullable
                       , None = True
                       }
@@ -91,4 +91,4 @@ let run =
               (Value.run config input.value)
           )
 
-in  Algebra.module Input Output run
+in  Deps.Sdk.Sigs.Interpreter.module ResolvedTarget.Type Input Output run

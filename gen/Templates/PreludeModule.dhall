@@ -1,4 +1,4 @@
-let Algebra = ./Algebra/package.dhall
+let Sdk = ../Deps/Sdk.dhall
 
 let Params = { projectNamespace : Text }
 
@@ -24,4 +24,4 @@ let run =
 
         ''
 
-in  Algebra.module Params run
+in  Sdk.Sigs.Template.module Params run

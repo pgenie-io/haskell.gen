@@ -1,6 +1,6 @@
 let Deps = ../Deps/package.dhall
 
-let Algebra = ./Algebra/package.dhall
+let ResolvedTarget = ../ResolvedTarget.dhall
 
 let Templates = ../Templates/package.dhall
 
@@ -8,23 +8,23 @@ let Lude = Deps.Lude
 
 let Member = ./Member.dhall
 
-let Project = Deps.Project
+let Contract = Deps.Contract
 
-let Input = Project.ResultRows
+let Input = Contract.ResultRows
 
 let Output = Text -> { decoderExp : Text, typeDecls : Text }
 
 let run =
-      \(config : Algebra.Config) ->
+      \(config : ResolvedTarget.Type) ->
       \(input : Input) ->
         let compiledColumns =
               Deps.Typeclasses.Classes.Applicative.traverseList
                 Deps.Lude.Compiled.Type
                 Deps.Lude.Compiled.applicative
-                Project.Member
+                Contract.Member
                 Member.Output
                 (Member.run config)
-                (Deps.Prelude.NonEmpty.toList Project.Member input.columns)
+                (Deps.Prelude.NonEmpty.toList Contract.Member input.columns)
 
         in  Deps.Lude.Compiled.flatMap
               (List Member.Output)
@@ -104,4 +104,4 @@ let run =
               )
               compiledColumns
 
-in  Algebra.module Input Output run
+in  Deps.Sdk.Sigs.Interpreter.module ResolvedTarget.Type Input Output run

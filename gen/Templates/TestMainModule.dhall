@@ -1,4 +1,4 @@
-let Algebra = ./Algebra/package.dhall
+let Sdk = ../Deps/Sdk.dhall
 
 let Prelude = ../Deps/Prelude.dhall
 
@@ -13,7 +13,7 @@ let postgresTag = "postgres:18"
 let Params =
       { statementsSpecModuleNamespace : Text, migrations : List Migration }
 
-in  Algebra.module
+in  Sdk.Sigs.Template.module
       Params
       ( \(params : Params) ->
           let runMigrationsBody =

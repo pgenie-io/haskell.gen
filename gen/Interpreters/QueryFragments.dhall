@@ -1,12 +1,12 @@
 let Deps = ../Deps/package.dhall
 
-let Algebra = ./Algebra/package.dhall
+let ResolvedTarget = ../ResolvedTarget.dhall
 
 let Prelude = Deps.Prelude
 
-let Project = Deps.Project
+let Contract = Deps.Contract
 
-let Input = Project.QueryFragments
+let Input = Contract.QueryFragments
 
 let Output
     : Type
@@ -22,16 +22,16 @@ let escapeText
         ]
 
 let renderExp
-    : Project.QueryFragments -> Text
-    = \(fragments : Project.QueryFragments) ->
+    : Contract.QueryFragments -> Text
+    = \(fragments : Contract.QueryFragments) ->
             "\""
         ++  Prelude.Text.concatMap
-              Project.QueryFragment
-              ( \(queryFragment : Project.QueryFragment) ->
+              Contract.QueryFragment
+              ( \(queryFragment : Contract.QueryFragment) ->
                   merge
                     { Sql = escapeText
                     , Var =
-                        \(var : Project.Var) ->
+                        \(var : Contract.Var) ->
                           "\$" ++ Deps.Prelude.Natural.show (var.paramIndex + 1)
                     }
                     queryFragment
@@ -40,22 +40,22 @@ let renderExp
         ++  "\""
 
 let renderHaddock
-    : Project.QueryFragments -> Text
+    : Contract.QueryFragments -> Text
     = Prelude.Text.concatMap
-        Project.QueryFragment
-        ( \(queryFragment : Project.QueryFragment) ->
+        Contract.QueryFragment
+        ( \(queryFragment : Contract.QueryFragment) ->
             merge
               { Sql = Prelude.Function.identity Text
-              , Var = \(var : Project.Var) -> "\$" ++ var.rawName
+              , Var = \(var : Contract.Var) -> "\$" ++ var.rawName
               }
               queryFragment
         )
 
 let run =
-      \(config : Algebra.Config) ->
+      \(config : ResolvedTarget.Type) ->
       \(input : Input) ->
         Deps.Lude.Compiled.ok
           Output
           { exp = renderExp input, haddock = renderHaddock input }
 
-in  Algebra.module Input Output run
+in  Deps.Sdk.Sigs.Interpreter.module ResolvedTarget.Type Input Output run
