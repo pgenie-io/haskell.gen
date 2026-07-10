@@ -1,20 +1,22 @@
-let Deps = ../Deps/package.dhall
-
-let ResolvedTarget = ../ResolvedTarget.dhall
+let InterpreterConfig = ../InterpreterConfig.dhall
 
 let ResultRows = ./ResultRows.dhall
 
-let Contract = Deps.Contract
+let Contract = ../Deps/Contract.dhall
+
+let Lude = ../Deps/Lude.dhall
+
+let Sdk = ../Deps/Sdk.dhall
 
 let Input = Contract.Result
 
 let Output = Text -> { typeDecls : Text, decoderExp : Text }
 
-let Result = Deps.Lude.Compiled.Type Output
+let Result = Lude.Compiled.Type Output
 
 let rowsAffectedResult
     : Result
-    = Deps.Lude.Compiled.ok
+    = Lude.Compiled.ok
         Output
         ( \(typeNameBase : Text) ->
             { typeDecls =
@@ -27,7 +29,7 @@ let rowsAffectedResult
 
 let voidResult
     : Result
-    = Deps.Lude.Compiled.ok
+    = Lude.Compiled.ok
         Output
         ( \(typeNameBase : Text) ->
             { typeDecls =
@@ -39,7 +41,7 @@ let voidResult
         )
 
 let run =
-      \(config : ResolvedTarget.Type) ->
+      \(config : InterpreterConfig.Type) ->
       \(input : Input) ->
         merge
           { Void = voidResult
@@ -48,4 +50,4 @@ let run =
           }
           input
 
-in  Deps.Sdk.Sigs.Interpreter.module ResolvedTarget.Type Input Output run
+in  Sdk.Sigs.interpreter InterpreterConfig.Type Input Output run

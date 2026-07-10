@@ -1,8 +1,12 @@
-let Deps = ../Deps/package.dhall
+let InterpreterConfig = ../InterpreterConfig.dhall
 
-let ResolvedTarget = ../ResolvedTarget.dhall
+let Contract = ../Deps/Contract.dhall
 
-let Contract = Deps.Contract
+let Lude = ../Deps/Lude.dhall
+
+let Prelude = ../Deps/Prelude.dhall
+
+let Sdk = ../Deps/Sdk.dhall
 
 let Templates = ../Templates/package.dhall
 
@@ -18,7 +22,7 @@ let Output =
       }
 
 let run =
-      \(config : ResolvedTarget.Type) ->
+      \(config : InterpreterConfig.Type) ->
       \(input : Input) ->
         let moduleName = input.name.inPascalCase
 
@@ -26,22 +30,20 @@ let run =
               config.rootNamespace # [ "Types", input.name.inPascalCase ]
 
         let moduleNamespace =
-              Deps.Prelude.Text.concatSep "." moduleNamespaceAsList
+              Prelude.Text.concatSep "." moduleNamespaceAsList
 
         let modulePath =
               Templates.ModulePath.run { namespace = moduleNamespaceAsList }
 
         let preludeModuleName =
-              Deps.Prelude.Text.concatSep
-                "."
-                (config.rootNamespace # [ "Prelude" ])
+              Prelude.Text.concatSep "." (config.rootNamespace # [ "Prelude" ])
 
         in  merge
               { Composite =
                   \(members : List Contract.Member) ->
                     let compiledMembers
-                        : Deps.Lude.Compiled.Type (List MemberGen.Output)
-                        = Deps.Lude.Compiled.traverseList
+                        : Lude.Compiled.Type (List MemberGen.Output)
+                        = Lude.Compiled.traverseList
                             Contract.Member
                             MemberGen.Output
                             (MemberGen.run config)
@@ -49,7 +51,7 @@ let run =
 
                     let customTypeModules
                         : List Text
-                        = Deps.Prelude.List.mapMaybe
+                        = Prelude.List.mapMaybe
                             Contract.Member
                             Text
                             ( \(member : Contract.Member) ->
@@ -59,7 +61,7 @@ let run =
                                   , Custom =
                                       \(name : Contract.Name) ->
                                         Some
-                                          ( Deps.Prelude.Text.concatSep
+                                          ( Prelude.Text.concatSep
                                               "."
                                               (   config.rootNamespace
                                                 # [ "Types", name.inPascalCase ]
@@ -71,8 +73,8 @@ let run =
                             members
 
                     let compiledOutput
-                        : Deps.Lude.Compiled.Type Output
-                        = Deps.Lude.Compiled.map
+                        : Lude.Compiled.Type Output
+                        = Lude.Compiled.map
                             (List MemberGen.Output)
                             Output
                             ( \(members : List MemberGen.Output) ->
@@ -88,7 +90,7 @@ let run =
                                       , pgTypeName = input.pgName
                                       , customTypeModules
                                       , fieldNames =
-                                          Deps.Prelude.List.map
+                                          Prelude.List.map
                                             MemberGen.Output
                                             Text
                                             ( \(member : MemberGen.Output) ->
@@ -96,7 +98,7 @@ let run =
                                             )
                                             members
                                       , fieldDeclarations =
-                                          Deps.Prelude.List.map
+                                          Prelude.List.map
                                             MemberGen.Output
                                             Text
                                             ( \(member : MemberGen.Output) ->
@@ -104,7 +106,7 @@ let run =
                                             )
                                             members
                                       , fieldEncoderExps =
-                                          Deps.Prelude.List.map
+                                          Prelude.List.map
                                             MemberGen.Output
                                             Text
                                             ( \(member : MemberGen.Output) ->
@@ -113,7 +115,7 @@ let run =
                                             )
                                             members
                                       , fieldDecoderExps =
-                                          Deps.Prelude.List.map
+                                          Prelude.List.map
                                             MemberGen.Output
                                             Text
                                             ( \(member : MemberGen.Output) ->
@@ -128,7 +130,7 @@ let run =
                     in  compiledOutput
               , Enum =
                   \(variants : List Contract.EnumVariant) ->
-                    Deps.Lude.Compiled.ok
+                    Lude.Compiled.ok
                       Output
                       { moduleName
                       , moduleNamespace
@@ -141,7 +143,7 @@ let run =
                             , pgSchema = input.pgSchema
                             , pgTypeName = input.pgName
                             , variants =
-                                Deps.Prelude.List.map
+                                Prelude.List.map
                                   Contract.EnumVariant
                                   Templates.CustomEnumTypeModule.Variant
                                   ( \(variant : Contract.EnumVariant) ->
@@ -154,10 +156,10 @@ let run =
                       }
               , Domain =
                   \(value : Contract.Value) ->
-                    Deps.Lude.Compiled.message
+                    Lude.Compiled.message
                       Output
                       "Domain types are not yet supported."
               }
               input.definition
 
-in  Deps.Sdk.Sigs.Interpreter.module ResolvedTarget.Type Input Output run
+in  Sdk.Sigs.interpreter InterpreterConfig.Type Input Output run

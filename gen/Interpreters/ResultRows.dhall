@@ -1,36 +1,40 @@
-let Deps = ../Deps/package.dhall
-
-let ResolvedTarget = ../ResolvedTarget.dhall
+let InterpreterConfig = ../InterpreterConfig.dhall
 
 let Templates = ../Templates/package.dhall
 
-let Lude = Deps.Lude
+let Lude = ../Deps/Lude.dhall
+
+let Prelude = ../Deps/Prelude.dhall
+
+let Typeclasses = ../Deps/Typeclasses.dhall
+
+let Sdk = ../Deps/Sdk.dhall
 
 let Member = ./Member.dhall
 
-let Contract = Deps.Contract
+let Contract = ../Deps/Contract.dhall
 
 let Input = Contract.ResultRows
 
 let Output = Text -> { decoderExp : Text, typeDecls : Text }
 
 let run =
-      \(config : ResolvedTarget.Type) ->
+      \(config : InterpreterConfig.Type) ->
       \(input : Input) ->
         let compiledColumns =
-              Deps.Typeclasses.Classes.Applicative.traverseList
-                Deps.Lude.Compiled.Type
-                Deps.Lude.Compiled.applicative
+              Typeclasses.Classes.Applicative.traverseList
+                Lude.Compiled.Type
+                Lude.Compiled.applicative
                 Contract.Member
                 Member.Output
                 (Member.run config)
-                (Deps.Prelude.NonEmpty.toList Contract.Member input.columns)
+                (Prelude.NonEmpty.toList Contract.Member input.columns)
 
-        in  Deps.Lude.Compiled.flatMap
+        in  Lude.Compiled.flatMap
               (List Member.Output)
               Output
               ( \(columns : List Member.Output) ->
-                  Deps.Lude.Compiled.ok
+                  Lude.Compiled.ok
                     Output
                     ( \(typeNameBase : Text) ->
                         let rowTypeName = "${typeNameBase}ResultRow"
@@ -39,7 +43,7 @@ let run =
                                   Templates.RecordDeclaration.run
                                     { name = rowTypeName
                                     , fields =
-                                        Deps.Prelude.List.map
+                                        Prelude.List.map
                                           Member.Output
                                           Text
                                           ( \(column : Member.Output) ->
@@ -52,7 +56,7 @@ let run =
 
                         let rowDecoderExp =
                               let columnBindings =
-                                    Deps.Prelude.Text.concatMapSep
+                                    Prelude.Text.concatMapSep
                                       "\n"
                                       Member.Output
                                       ( \(column : Member.Output) ->
@@ -104,4 +108,4 @@ let run =
               )
               compiledColumns
 
-in  Deps.Sdk.Sigs.Interpreter.module ResolvedTarget.Type Input Output run
+in  Sdk.Sigs.interpreter InterpreterConfig.Type Input Output run

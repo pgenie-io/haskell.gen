@@ -1,8 +1,10 @@
-let Deps = ../Deps/package.dhall
+let InterpreterConfig = ../InterpreterConfig.dhall
 
-let ResolvedTarget = ../ResolvedTarget.dhall
+let Contract = ../Deps/Contract.dhall
 
-let Contract = Deps.Contract
+let Lude = ../Deps/Lude.dhall
+
+let Sdk = ../Deps/Sdk.dhall
 
 let Input = Contract.Primitive
 
@@ -19,12 +21,12 @@ let fromWrapped = \(converter : Text) -> "(${converter} <\$> arbitrary)"
 
 let unsupportedType =
       \(type : Text) ->
-        Deps.Lude.Compiled.report Output [ type ] "Unsupported type"
+        Lude.Compiled.report Output [ type ] "Unsupported type"
 
 let std =
       \(sig : Text) ->
       \(codecName : Text) ->
-        Deps.Lude.Compiled.ok
+        Lude.Compiled.ok
           Output
           { sig
           , encoderExp = "Hasql.Encoders.${codecName}"
@@ -36,7 +38,7 @@ let fromWrappedGen =
       \(sig : Text) ->
       \(codecName : Text) ->
       \(converter : Text) ->
-        Deps.Lude.Compiled.ok
+        Lude.Compiled.ok
           Output
           { sig
           , encoderExp = "Hasql.Encoders.${codecName}"
@@ -46,7 +48,7 @@ let fromWrappedGen =
 
 let isScalar =
       \(sig : Text) ->
-        Deps.Lude.Compiled.ok
+        Lude.Compiled.ok
           Output
           { sig
           , encoderExp = "Hasql.Mapping.IsScalar.encoder"
@@ -55,7 +57,7 @@ let isScalar =
           }
 
 let run =
-      \(config : ResolvedTarget.Type) ->
+      \(config : InterpreterConfig.Type) ->
       \(input : Input) ->
         merge
           { Bit = isScalar "PostgresqlTypes.Bit 1"
@@ -100,7 +102,7 @@ let run =
           , Money = isScalar "PostgresqlTypes.Money"
           , Name = unsupportedType "name"
           , Numeric =
-              Deps.Lude.Compiled.ok
+              Lude.Compiled.ok
                 Output
                 { sig = "Scientific"
                 , encoderExp = "Hasql.Mapping.IsScalar.encoder"
@@ -144,4 +146,4 @@ let run =
           }
           input
 
-in  Deps.Sdk.Sigs.Interpreter.module ResolvedTarget.Type Input Output run
+in  Sdk.Sigs.interpreter InterpreterConfig.Type Input Output run

@@ -1,8 +1,14 @@
-let Deps = ../Deps/package.dhall
+let InterpreterConfig = ../InterpreterConfig.dhall
 
-let ResolvedTarget = ../ResolvedTarget.dhall
+let Contract = ../Deps/Contract.dhall
 
-let Contract = Deps.Contract
+let Lude = ../Deps/Lude.dhall
+
+let Prelude = ../Deps/Prelude.dhall
+
+let Typeclasses = ../Deps/Typeclasses.dhall
+
+let Sdk = ../Deps/Sdk.dhall
 
 let Templates = ../Templates/package.dhall
 
@@ -10,25 +16,34 @@ let QueryGen = ./Query.dhall
 
 let CustomTypeGen = ./CustomType.dhall
 
+let Config = {}
+
 let Input = Contract.Project
 
-let Output = List Deps.Lude.File.Type
+let Output = List Lude.File.Type
+
+let resolve =
+      \(input : Input) ->
+          { rootNamespace =
+            [ input.space.inPascalCase, input.name.inPascalCase ]
+          }
+        : InterpreterConfig.Type
 
 let combineOutputs =
-      \(config : ResolvedTarget.Type) ->
+      \(config : InterpreterConfig.Type) ->
       \(input : Input) ->
       \(queries : List QueryGen.Output) ->
       \(customTypes : List CustomTypeGen.Output) ->
         let projectNamespace =
-              Deps.Prelude.Text.concatSep "." config.rootNamespace
+              Prelude.Text.concatSep "." config.rootNamespace
 
-        let rootNamespace = Deps.Prelude.Text.concatSep "." config.rootNamespace
+        let rootNamespace = Prelude.Text.concatSep "." config.rootNamespace
 
         let customTypeFiles
-            : List Deps.Lude.File.Type
-            = Deps.Prelude.List.map
+            : List Lude.File.Type
+            = Prelude.List.map
                 CustomTypeGen.Output
-                Deps.Lude.File.Type
+                Lude.File.Type
                 ( \(customType : CustomTypeGen.Output) ->
                     { path = customType.modulePath
                     , content = customType.moduleContent
@@ -37,10 +52,10 @@ let combineOutputs =
                 customTypes
 
         let statementFiles
-            : List Deps.Lude.File.Type
-            = Deps.Prelude.List.map
+            : List Lude.File.Type
+            = Prelude.List.map
                 QueryGen.Output
-                Deps.Lude.File.Type
+                Lude.File.Type
                 ( \(query : QueryGen.Output) ->
                     { path = query.statementModulePath
                     , content = query.statementModuleContents
@@ -49,10 +64,10 @@ let combineOutputs =
                 queries
 
         let testStatementFiles
-            : List Deps.Lude.File.Type
-            = Deps.Prelude.List.map
+            : List Lude.File.Type
+            = Prelude.List.map
                 QueryGen.Output
-                Deps.Lude.File.Type
+                Lude.File.Type
                 ( \(query : QueryGen.Output) ->
                     { path = query.statementTestModulePath
                     , content = query.statementTestModuleContents
@@ -61,7 +76,7 @@ let combineOutputs =
                 queries
 
         let preludeFile
-            : Deps.Lude.File.Type
+            : Lude.File.Type
             = { path =
                   Templates.ModulePath.run
                     { namespace = config.rootNamespace # [ "Prelude" ] }
@@ -71,10 +86,10 @@ let combineOutputs =
         let statementsSpecModuleNamespace = rootNamespace ++ ".StatementsSpec"
 
         let statementsSpecFile
-            : Deps.Lude.File.Type
+            : Lude.File.Type
             = { path =
                       "test/"
-                  ++  Deps.Prelude.Text.concatSep
+                  ++  Prelude.Text.concatSep
                         "/"
                         (config.rootNamespace # [ "StatementsSpec" ])
                   ++  ".hs"
@@ -83,7 +98,7 @@ let combineOutputs =
                     { moduleNamespace = statementsSpecModuleNamespace
                     , statementsModuleNamespace = rootNamespace ++ ".Statements"
                     , statementSpecs =
-                        Deps.Prelude.List.map
+                        Prelude.List.map
                           QueryGen.Output
                           Text
                           ( \(query : QueryGen.Output) ->
@@ -94,7 +109,7 @@ let combineOutputs =
               }
 
         let testMainFile
-            : Deps.Lude.File.Type
+            : Lude.File.Type
             = { path = "test/Main.hs"
               , content =
                   Templates.TestMainModule.run
@@ -104,7 +119,7 @@ let combineOutputs =
               }
 
         let customTypesFile
-            : Deps.Lude.File.Type
+            : Lude.File.Type
             = { path =
                   Templates.ModulePath.run
                     { namespace = config.rootNamespace # [ "Types" ] }
@@ -113,7 +128,7 @@ let combineOutputs =
                     { haddock = None Text
                     , namespace = rootNamespace ++ ".Types"
                     , reexportedModules =
-                        Deps.Prelude.List.map
+                        Prelude.List.map
                           CustomTypeGen.Output
                           Templates.ReexportModule.ReexportedModule
                           ( \(customType : CustomTypeGen.Output) ->
@@ -126,7 +141,7 @@ let combineOutputs =
               }
 
         let statementsFile
-            : Deps.Lude.File.Type
+            : Lude.File.Type
             = { path =
                   Templates.ModulePath.run
                     { namespace = config.rootNamespace # [ "Statements" ] }
@@ -140,7 +155,7 @@ let combineOutputs =
                         ''
                     , namespace = rootNamespace ++ ".Statements"
                     , reexportedModules =
-                        Deps.Prelude.List.map
+                        Prelude.List.map
                           QueryGen.Output
                           Templates.ReexportModule.ReexportedModule
                           ( \(query : QueryGen.Output) ->
@@ -151,7 +166,7 @@ let combineOutputs =
               }
 
         let cabalFile
-            : Deps.Lude.File.Type
+            : Lude.File.Type
             = let packageName =
                     input.space.inKebabCase ++ "-" ++ input.name.inKebabCase
 
@@ -162,7 +177,7 @@ let combineOutputs =
                       { packageName
                       , rootNamespace
                       , statementModuleNames =
-                          Deps.Prelude.List.map
+                          Prelude.List.map
                             QueryGen.Output
                             Text
                             ( \(query : QueryGen.Output) ->
@@ -170,7 +185,7 @@ let combineOutputs =
                             )
                             queries
                       , statementTestModuleNames =
-                          Deps.Prelude.List.map
+                          Prelude.List.map
                             QueryGen.Output
                             Text
                             ( \(query : QueryGen.Output) ->
@@ -178,7 +193,7 @@ let combineOutputs =
                             )
                             queries
                       , customTypeNames =
-                          Deps.Prelude.List.map
+                          Prelude.List.map
                             CustomTypeGen.Output
                             Text
                             ( \(customType : CustomTypeGen.Output) ->
@@ -207,51 +222,53 @@ let combineOutputs =
               # customTypeFiles
               # statementFiles
               # testStatementFiles
-            : List Deps.Lude.File.Type
+            : List Lude.File.Type
 
 let run =
-      \(config : ResolvedTarget.Type) ->
+      \(config : Config) ->
       \(input : Input) ->
+        let resolvedConfig = resolve input
+
         let compiledQueries
-            : Deps.Lude.Compiled.Type (List (Optional QueryGen.Output))
-            = Deps.Lude.Compiled.traverseList
+            : Lude.Compiled.Type (List (Optional QueryGen.Output))
+            = Lude.Compiled.traverseList
                 Contract.Query
                 (Optional QueryGen.Output)
                 ( \(query : Contract.Query) ->
-                    Deps.Typeclasses.Classes.Alternative.optional
-                      Deps.Lude.Compiled.Type
-                      Deps.Lude.Compiled.alternative
+                    Typeclasses.Classes.Alternative.optional
+                      Lude.Compiled.Type
+                      Lude.Compiled.alternative
                       QueryGen.Output
-                      (QueryGen.run config query)
+                      (QueryGen.run resolvedConfig query)
                 )
                 input.queries
 
         let compiledQueries
-            : Deps.Lude.Compiled.Type (List QueryGen.Output)
-            = Deps.Lude.Compiled.map
+            : Lude.Compiled.Type (List QueryGen.Output)
+            = Lude.Compiled.map
                 (List (Optional QueryGen.Output))
                 (List QueryGen.Output)
-                (Deps.Prelude.List.unpackOptionals QueryGen.Output)
+                (Prelude.List.unpackOptionals QueryGen.Output)
                 compiledQueries
 
         let compiledTypes
-            : Deps.Lude.Compiled.Type (List CustomTypeGen.Output)
-            = Deps.Lude.Compiled.traverseList
+            : Lude.Compiled.Type (List CustomTypeGen.Output)
+            = Lude.Compiled.traverseList
                 Contract.CustomType
                 CustomTypeGen.Output
-                (CustomTypeGen.run config)
+                (CustomTypeGen.run resolvedConfig)
                 input.customTypes
 
         let files
-            : Deps.Lude.Compiled.Type (List Deps.Lude.File.Type)
-            = Deps.Lude.Compiled.map2
+            : Lude.Compiled.Type (List Lude.File.Type)
+            = Lude.Compiled.map2
                 (List QueryGen.Output)
                 (List CustomTypeGen.Output)
-                (List Deps.Lude.File.Type)
-                (combineOutputs config input)
+                (List Lude.File.Type)
+                (combineOutputs resolvedConfig input)
                 compiledQueries
                 compiledTypes
 
         in  files
 
-in  Deps.Sdk.Sigs.Interpreter.module ResolvedTarget.Type Input Output run
+in  Sdk.Sigs.interpreter Config Input Output run

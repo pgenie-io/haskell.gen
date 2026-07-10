@@ -1,8 +1,14 @@
-let Deps = ../Deps/package.dhall
+let InterpreterConfig = ../InterpreterConfig.dhall
 
-let ResolvedTarget = ../ResolvedTarget.dhall
+let Contract = ../Deps/Contract.dhall
+
+let Lude = ../Deps/Lude.dhall
+
+let Prelude = ../Deps/Prelude.dhall
 
 let Typeclasses = ../Deps/Typeclasses.dhall
+
+let Sdk = ../Deps/Sdk.dhall
 
 let Templates = ../Templates/package.dhall
 
@@ -12,7 +18,7 @@ let QueryFragmentsModule = ./QueryFragments.dhall
 
 let MemberModule = ./Member.dhall
 
-let Input = Deps.Contract.Query
+let Input = Contract.Query
 
 let Output =
       { statementModuleName : Text
@@ -28,7 +34,7 @@ let Output =
       }
 
 let render =
-      \(config : ResolvedTarget.Type) ->
+      \(config : InterpreterConfig.Type) ->
       \(input : Input) ->
       \(result : ResultModule.Output) ->
       \(fragments : QueryFragmentsModule.Output) ->
@@ -39,7 +45,7 @@ let render =
               config.rootNamespace # [ "Statements", statementModuleName ]
 
         let statementModuleNamespace =
-              Deps.Prelude.Text.concatSep "." statementModuleNamespaceAsList
+              Prelude.Text.concatSep "." statementModuleNamespaceAsList
 
         let statementModulePath =
               Templates.ModulePath.run
@@ -55,11 +61,11 @@ let render =
               config.rootNamespace # [ "Statements", statementTestModuleName ]
 
         let statementTestModuleNamespace =
-              Deps.Prelude.Text.concatSep "." statementTestModuleNamespaceAsList
+              Prelude.Text.concatSep "." statementTestModuleNamespaceAsList
 
         let statementTestModulePath =
                   "test/"
-              ++  Deps.Prelude.Text.concatSep
+              ++  Prelude.Text.concatSep
                     "/"
                     statementTestModuleNamespaceAsList
               ++  ".hs"
@@ -67,14 +73,14 @@ let render =
         let result = result statementModuleName
 
         let projectNamespace =
-              Deps.Prelude.Text.concatSep "." config.rootNamespace
+              Prelude.Text.concatSep "." config.rootNamespace
 
         let queryName = input.name.inSnakeCase
 
         let statementsModuleNamespace = projectNamespace ++ ".Statements"
 
         let identityValueNames =
-              Deps.Prelude.List.map
+              Prelude.List.map
                 MemberModule.Output
                 Text
                 (\(member : MemberModule.Output) -> member.fieldName)
@@ -90,7 +96,7 @@ let render =
                 , statementResultTypeName
                 , sqlForDocs = fragments.haddock
                 , statementParamsFields =
-                    Deps.Prelude.List.map
+                    Prelude.List.map
                       MemberModule.Output
                       Text
                       ( \(member : MemberModule.Output) ->
@@ -99,7 +105,7 @@ let render =
                       params
                 , resultTypeDecls = result.typeDecls
                 , statementArbitraryGens =
-                    Deps.Prelude.List.map
+                    Prelude.List.map
                       MemberModule.Output
                       Text
                       ( \(member : MemberModule.Output) ->
@@ -108,7 +114,7 @@ let render =
                       params
                 , sqlExp = fragments.exp
                 , encoderExps =
-                    Deps.Prelude.List.map
+                    Prelude.List.map
                       MemberModule.Output
                       Text
                       ( \(member : MemberModule.Output) ->
@@ -144,36 +150,36 @@ let render =
             }
 
 let run =
-      \(config : ResolvedTarget.Type) ->
+      \(config : InterpreterConfig.Type) ->
       \(input : Input) ->
-        Deps.Lude.Compiled.nest
+        Lude.Compiled.nest
           Output
           input.srcPath
           ( Typeclasses.Classes.Applicative.map3
-              Deps.Lude.Compiled.Type
-              Deps.Lude.Compiled.applicative
+              Lude.Compiled.Type
+              Lude.Compiled.applicative
               ResultModule.Output
               QueryFragmentsModule.Output
               (List MemberModule.Output)
               Output
               (render config input)
-              ( Deps.Lude.Compiled.nest
+              ( Lude.Compiled.nest
                   ResultModule.Output
                   "result"
                   (ResultModule.run config input.result)
               )
-              ( Deps.Lude.Compiled.nest
+              ( Lude.Compiled.nest
                   QueryFragmentsModule.Output
                   "sql"
                   (QueryFragmentsModule.run config input.fragments)
               )
-              ( Deps.Lude.Compiled.nest
+              ( Lude.Compiled.nest
                   (List MemberModule.Output)
                   "params"
                   ( Typeclasses.Classes.Applicative.traverseList
-                      Deps.Lude.Compiled.Type
-                      Deps.Lude.Compiled.applicative
-                      Deps.Contract.Member
+                      Lude.Compiled.Type
+                      Lude.Compiled.applicative
+                      Contract.Member
                       MemberModule.Output
                       (MemberModule.run config)
                       input.params
@@ -181,4 +187,4 @@ let run =
               )
           )
 
-in  Deps.Sdk.Sigs.Interpreter.module ResolvedTarget.Type Input Output run
+in  Sdk.Sigs.interpreter InterpreterConfig.Type Input Output run

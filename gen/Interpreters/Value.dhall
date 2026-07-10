@@ -1,10 +1,12 @@
-let Deps = ../Deps/package.dhall
+let InterpreterConfig = ../InterpreterConfig.dhall
 
-let ResolvedTarget = ../ResolvedTarget.dhall
+let Lude = ../Deps/Lude.dhall
 
-let Lude = Deps.Lude
+let Prelude = ../Deps/Prelude.dhall
 
-let Contract = Deps.Contract
+let Contract = ../Deps/Contract.dhall
+
+let Sdk = ../Deps/Sdk.dhall
 
 let Templates = ../Templates/package.dhall
 
@@ -19,16 +21,16 @@ let Output =
       , testArbitraryGen : Text
       }
 
-let Result = Deps.Lude.Compiled.Type Output
+let Result = Lude.Compiled.Type Output
 
 let run =
-      \(config : ResolvedTarget.Type) ->
+      \(config : InterpreterConfig.Type) ->
       \(input : Input) ->
-        Deps.Lude.Compiled.flatMap
+        Lude.Compiled.flatMap
           Scalar.Output
           Output
           ( \(scalar : Scalar.Output) ->
-              Deps.Prelude.Optional.fold
+              Prelude.Optional.fold
                 Contract.ArraySettings
                 input.arraySettings
                 Result
@@ -83,7 +85,7 @@ let run =
                                   }
 
                           let statements =
-                                Deps.Prelude.Text.concatSep
+                                Prelude.Text.concatSep
                                   "\n"
                                   generated.bindings
 
@@ -98,7 +100,7 @@ let run =
                           then  "(liftArbitrary ${innerElement})"
                           else  rectangularArbitrary
 
-                    in  Deps.Lude.Compiled.ok
+                    in  Lude.Compiled.ok
                           Output
                           { sig =
                               Templates.DimensionalityType.run
@@ -124,7 +126,7 @@ let run =
                           , testArbitraryGen
                           }
                 )
-                ( Deps.Lude.Compiled.ok
+                ( Lude.Compiled.ok
                     Output
                     { sig = scalar.sig
                     , encoderExp = scalar.encoderExp
@@ -135,4 +137,4 @@ let run =
           )
           (Scalar.run config input.scalar)
 
-in  Deps.Sdk.Sigs.Interpreter.module ResolvedTarget.Type Input Output run
+in  Sdk.Sigs.interpreter InterpreterConfig.Type Input Output run

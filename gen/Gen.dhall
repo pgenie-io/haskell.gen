@@ -1,3 +1,9 @@
-let Contract = ./Deps/Contract.dhall
+let Sdk = ./Deps/Sdk.dhall
 
-in  Contract.module ./Config.dhall ./compile.dhall
+let ProjectInterpreter = ./Interpreters/Project.dhall
+
+let Config = ProjectInterpreter.Config
+
+let defaultConfig = {=}
+
+in  Sdk.Sigs.generator Config defaultConfig ProjectInterpreter.run

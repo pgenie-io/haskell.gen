@@ -1,8 +1,10 @@
-let Deps = ../Deps/package.dhall
+let InterpreterConfig = ../InterpreterConfig.dhall
 
-let ResolvedTarget = ../ResolvedTarget.dhall
+let Contract = ../Deps/Contract.dhall
 
-let Contract = Deps.Contract
+let Lude = ../Deps/Lude.dhall
+
+let Sdk = ../Deps/Sdk.dhall
 
 let Value = ./Value.dhall
 
@@ -21,9 +23,9 @@ let Output =
       }
 
 let run =
-      \(config : ResolvedTarget.Type) ->
+      \(config : InterpreterConfig.Type) ->
       \(input : Input) ->
-        Deps.Lude.Compiled.flatMap
+        Lude.Compiled.flatMap
           Value.Output
           Output
           ( \(value : Value.Output) ->
@@ -56,7 +58,7 @@ let run =
                     then  "(liftArbitrary ${value.testArbitraryGen})"
                     else  value.testArbitraryGen
 
-              in  Deps.Lude.Compiled.ok
+              in  Lude.Compiled.ok
                     Output
                     { fieldName
                     , fieldEncoder =
@@ -85,10 +87,10 @@ let run =
                     , identityIsNullable = input.isNullable
                     }
           )
-          ( Deps.Lude.Compiled.nest
+          ( Lude.Compiled.nest
               Value.Output
               input.pgName
               (Value.run config input.value)
           )
 
-in  Deps.Sdk.Sigs.Interpreter.module ResolvedTarget.Type Input Output run
+in  Sdk.Sigs.interpreter InterpreterConfig.Type Input Output run

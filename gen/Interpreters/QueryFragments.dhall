@@ -1,10 +1,12 @@
-let Deps = ../Deps/package.dhall
+let InterpreterConfig = ../InterpreterConfig.dhall
 
-let ResolvedTarget = ../ResolvedTarget.dhall
+let Prelude = ../Deps/Prelude.dhall
 
-let Prelude = Deps.Prelude
+let Lude = ../Deps/Lude.dhall
 
-let Contract = Deps.Contract
+let Contract = ../Deps/Contract.dhall
+
+let Sdk = ../Deps/Sdk.dhall
 
 let Input = Contract.QueryFragments
 
@@ -32,7 +34,7 @@ let renderExp
                     { Sql = escapeText
                     , Var =
                         \(var : Contract.Var) ->
-                          "\$" ++ Deps.Prelude.Natural.show (var.paramIndex + 1)
+                          "\$" ++ Prelude.Natural.show (var.paramIndex + 1)
                     }
                     queryFragment
               )
@@ -52,10 +54,10 @@ let renderHaddock
         )
 
 let run =
-      \(config : ResolvedTarget.Type) ->
+      \(config : InterpreterConfig.Type) ->
       \(input : Input) ->
-        Deps.Lude.Compiled.ok
+        Lude.Compiled.ok
           Output
           { exp = renderExp input, haddock = renderHaddock input }
 
-in  Deps.Sdk.Sigs.Interpreter.module ResolvedTarget.Type Input Output run
+in  Sdk.Sigs.interpreter InterpreterConfig.Type Input Output run

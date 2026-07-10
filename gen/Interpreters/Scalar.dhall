@@ -1,8 +1,10 @@
-let Deps = ../Deps/package.dhall
+let InterpreterConfig = ../InterpreterConfig.dhall
 
-let ResolvedTarget = ../ResolvedTarget.dhall
+let Contract = ../Deps/Contract.dhall
 
-let Contract = Deps.Contract
+let Lude = ../Deps/Lude.dhall
+
+let Sdk = ../Deps/Sdk.dhall
 
 let Primitive = ./Primitive.dhall
 
@@ -16,12 +18,12 @@ let Output =
       }
 
 let run =
-      \(config : ResolvedTarget.Type) ->
+      \(config : InterpreterConfig.Type) ->
       \(input : Input) ->
         merge
           { Primitive =
               \(primitive : Contract.Primitive) ->
-                Deps.Lude.Compiled.map
+                Lude.Compiled.map
                   Primitive.Output
                   Output
                   ( \(p : Primitive.Output) ->
@@ -34,7 +36,7 @@ let run =
                   (Primitive.run config primitive)
           , Custom =
               \(name : Contract.Name) ->
-                Deps.Lude.Compiled.ok
+                Lude.Compiled.ok
                   Output
                   { sig = name.inPascalCase
                   , encoderExp =
@@ -46,4 +48,4 @@ let run =
           }
           input
 
-in  Deps.Sdk.Sigs.Interpreter.module ResolvedTarget.Type Input Output run
+in  Sdk.Sigs.interpreter InterpreterConfig.Type Input Output run
