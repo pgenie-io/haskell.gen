@@ -17,7 +17,7 @@ src/
     Typeclasses.dhall  -- typeclasses.dhall (Applicative, Alternative, ...)
   Interpreters/        -- model → data, tree-shaped, rooted at Project.dhall
   Templates/           -- pure Params → Text rendering functions
-demos/                 -- executable fixture drivers, e.g. Exhaustive.dhall
+fixtures/                 -- executable fixture drivers, e.g. Exhaustive.dhall
 ```
 
 `Deps/` contains nothing but frozen (`sha256`-pinned) remote imports. There is no `Deps/package.dhall` barrel: every consumer imports exactly the `Deps/*.dhall` files it uses.
@@ -52,7 +52,7 @@ Templates are pure `Params -> Text` functions. They are blind to the model and d
 
 ## Testing and verification
 
-`demos/Exhaustive.dhall` applies the generator to `Sdk.Fixtures.Exhaustive` and produces a file map via `Sdk.Output.toFileMap`:
+`fixtures/Exhaustive.dhall` applies the generator to `Sdk.Fixtures.Exhaustive` and produces a file map via `Sdk.Output.toFileMap`:
 
 ```dhall
 let Sdk = ../src/Deps/Sdk.dhall
@@ -63,7 +63,7 @@ in  Sdk.Output.toFileMap (Gen.compile (None Gen.Config) Sdk.Fixtures.Exhaustive)
 Materialise locally with:
 
 ```bash
-dhall to-directory-tree --allow-path-separators --file demos/Exhaustive.dhall --output demo-verify
+dhall to-directory-tree --allow-path-separators --file fixtures/Exhaustive.dhall --output generated-output
 ```
 
 Then build and test the generated project:
@@ -72,7 +72,7 @@ Then build and test the generated project:
 cabal test --project-dir=./demo-verify all
 ```
 
-The materialised `demo-verify/` directory is not committed.
+The materialised `generated-output/` directory is not committed.
 
 ## Dhall style
 

@@ -16,7 +16,7 @@
 # Unignore subtrees:
 !/.github/
 !/src/
-!/demos/
+!/fixtures/
 
 # Ignore noise:
 .DS_Store

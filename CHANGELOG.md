@@ -2,6 +2,8 @@
 
 ## Non-breaking
 
+- Renamed `demos/` to `fixtures/` and `demo-verify/` to `generated-output/`, aligning the fixture-driver directory name with the `Sdk.Fixtures` module it exercises.
+
 - Migrated repository layout to align with the pGenie generator architecture and `java.gen` v1.1.0:
   - Generator implementation moved from `gen/` to `src/`.
   - Public entry point renamed from `gen/Gen.dhall` to `src/package.dhall`.
