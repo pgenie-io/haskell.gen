@@ -20,7 +20,7 @@ src/
 fixtures/                 -- executable fixture drivers, e.g. Exhaustive.dhall
 ```
 
-`Deps/` contains nothing but frozen (`sha256`-pinned) remote imports. There is no `Deps/package.dhall` barrel: every consumer imports exactly the `Deps/*.dhall` files it uses.
+`Deps/` contains nothing but frozen (`sha256`-pinned) remote imports. There is no `Deps/package.dhall` barrel: every consumer imports exactly the `Deps/*.dhall` files it uses. Never point a `Deps/*.dhall` file (or any other import) at a sibling repo via a local filesystem path (`../gen-contract/...`, `../gen-sdk/...`) — it only resolves on a machine with those repos checked out side by side and breaks CI. Always pin a `https://raw.githubusercontent.com/pgenie-io/<repo>/<tag>/...` URL with its `sha256`.
 
 ## The three sigs
 
