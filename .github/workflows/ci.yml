@@ -98,4 +98,4 @@ jobs:
 
       - name: Verify generated package
         working-directory: ${{ matrix.output_dir }}
-        run: cabal test all
+        run: cabal test all --enable-tests
