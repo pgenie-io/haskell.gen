@@ -29,7 +29,7 @@ name: music_catalogue
 version: 1.0.0
 artifacts:
   # Here
-  haskell: https://github.com/pgenie-io/haskell.gen/releases/download/v1.0.0/resolved.dhall
+  haskell: https://github.com/pgenie-io/haskell.gen/releases/download/v2.0.0/resolved.dhall
 ```
 
 Run the code generator:
