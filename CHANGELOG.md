@@ -1,5 +1,11 @@
 # Upcoming
 
+## Breaking
+
+- Updated generated packages to `hasql-2`:
+  - `hasql ^>=2.0`, `hasql-mapping ^>=0.1.0.2`, `hasql-postgresql-types >=0.2.1.3 && <0.3`.
+  - Generated integration tests moved to `hasql-pool ^>=1.5`, which now requires a `pqi` connection adapter; the generated `test/Main.hs` acquires the pool with `Pqi.Native.adapter` (new `pqi-native ^>=1.0` test dependency).
+
 ## Non-breaking
 
 - Renamed `demos/` to `fixtures/` and `demo-verify/` to `generated-output/`, aligning the fixture-driver directory name with the `Sdk.Fixtures` module it exercises.

@@ -43,6 +43,7 @@ in  Sdk.Sigs.template
               import qualified Hasql.Pool
               import qualified Hasql.Pool.Config
               import qualified Hasql.Session
+              import qualified Pqi.Native
               import Test.Hspec
               import qualified TestcontainersPostgresql
               import qualified ${params.statementsSpecModuleNamespace}
@@ -65,6 +66,7 @@ in  Sdk.Sigs.template
 
                           pool <-
                             Hasql.Pool.acquire
+                              Pqi.Native.adapter
                               ( Hasql.Pool.Config.settings
                                   [ Hasql.Pool.Config.size 10
                                   , Hasql.Pool.Config.staticConnectionSettings connectionSettings
